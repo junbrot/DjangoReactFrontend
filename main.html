@@ -1,0 +1,264 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    
+    <link href='./main.css' rel='stylesheet'>          
+    <script src="graph/highstock.js"></script>
+    <script src="graph/data.js"></script>
+    <!-- <script src="graph/export-data.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"  -->
+        <!-- integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" -->
+        <!-- crossorigin="anonymous"></script> -->
+
+    <script type="text/javascript" src="predict"></script>
+    <script>
+        function getTickerPredictData(ticker){
+
+            $.ajaxSetup({
+                async: false
+            });
+            
+            var predict = 0;
+
+            $.getJSON('./predict', function(data) {
+                for(key in data){
+                    if(data[key][0] == ticker){
+                        predict = data[key][1];   
+                    }
+                }       
+            });// }).done(function() {
+                // console.log( "second success" );
+            // });
+
+            return predict;
+        }
+
+        function drawChart(ticker,predict,location){
+
+            Highcharts.getJSON('./coin_info/'+ticker, function (data) {
+                
+                Highcharts.chart(location, {        
+                    chart: {
+                        zoomType: 'x'
+                    },
+                    title: {
+                        text: ''
+                    },
+                    // subtitle: {
+                        // text: document.ontouchstart === undefined ?
+                            // 'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+                    // },
+                    xAxis: {
+                        title:{
+                            text:''
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        plotLines: [{
+                            value: predict,
+                            color: 'green',
+                            dashStyle: 'shortdash',
+                            width: 2,
+                            label: {
+                                text: 'predict : '+predict
+                            }
+                        }]
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        area: {
+                            fillColor: {
+                                linearGradient: {
+                                    x1: 0,
+                                    y1: 0,
+                                    x2: 0,
+                                    y2: 1
+                                },
+                                stops: [
+                                    [0, Highcharts.getOptions().colors[0]],
+                                    [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                ]
+                            },
+                            marker: {
+                                radius: 2
+                            },
+                            lineWidth: 1,
+                            states: {
+                                hover: {
+                                    lineWidth: 1
+                                }
+                            },
+                            threshold: null
+                        }
+                    },
+
+                    series: [{
+                        type: 'area',
+                        // name: 'USD to EUR',
+                        data: data
+                    }]
+                });
+            });
+        }
+    </script>
+
+    <div class="Menu">
+        
+        <div>
+            <img src="./image/cloud-3000998_1280.png" id='logo'>
+        </div>
+
+        <div class="web_name">Coin Weather</div>
+        <div class="coin_predict">coin predict</div>
+        <div class="coin_interest">coin interest</div>
+        <div class="coin_issue">coin issue</div>
+        <div class="coin_login">coin login</div>
+        <!-- <input id="menu_button" value="night" onclick = " -->
+            <!-- alert('test'); -->
+        <!-- "> -->
+    </div>
+
+    <body> 
+        
+        <div class="search">
+            <input type="text">
+        </div>
+        
+        <div class = "coin_info">
+            <div id="ada">
+                <div id="ada_name">  ADA</div>
+                <div id="ada_text">
+                    yesterday_close : 1240.5<br><br>
+                    current_close(06:25) : 1300.5<br><br>
+                    predict : +1.03%(1350.5)
+                </div>
+            </div>
+
+            <div id="ada">
+                <div id="btc_name">  BTC</div>
+                <div id="btc_text">
+                    yesterday_close : 40803000<br><br>
+                    current_close(06:25) : 390803000<br><br>
+                    predict : -2.15%(41532000)
+                </div>
+            </div>
+
+            <div id="ada">
+                <div id="btc_name">  LOOM</div>
+                <div id="btc_text">
+                    yesterday_close : 75.7<br><br>
+                    current_close(06:25) : 82.9<br><br>
+                    predict : +12.03%(101.5)
+                </div>
+            </div>
+            
+        </div>
+
+        <div class = "coin_chart">
+            
+            
+            <div id="container">
+                <script>
+                    ticker_name = 'ADA';
+                    var predict = getTickerPredictData(ticker_name);
+                    console.log(predict);
+                    drawChart(ticker_name,predict,'container');
+                </script> 
+            </div>
+
+            <div id="container2">
+                <script>
+                    ticker_name = 'BTC';
+                    var predict = getTickerPredictData(ticker_name);
+                    console.log(predict);
+                    drawChart(ticker_name,predict,'container2');
+                </script> 
+            </div>   
+            
+            <div id="container3">
+                <script>
+                    ticker_name = 'LOOM';
+                    var predict = getTickerPredictData(ticker_name);
+                    console.log(predict);
+                    drawChart(ticker_name,predict,'container3');
+                </script> 
+             </div>   
+
+        </div>
+        
+        <div class = "coin_info">
+            <div id="ada">
+                <div id="ada_name">  ADA</div>
+                <div id="ada_text">
+                    yesterday_close : 1240.5<br><br>
+                    current_close(06:25) : 1300.5<br><br>
+                    predict : +1.03%(1350.5)
+                </div>
+            </div>
+
+            <div id="ada">
+                <div id="btc_name">  BTC</div>
+                <div id="btc_text">
+                    yesterday_close : 40803000<br><br>
+                    current_close(06:25) : 390803000<br><br>
+                    predict : -2.15%(41532000)
+                </div>
+            </div>
+
+            <div id="ada">
+                <div id="btc_name">  LOOM</div>
+                <div id="btc_text">
+                    yesterday_close : 75.7<br><br>
+                    current_close(06:25) : 82.9<br><br>
+                    predict : +12.03%(101.5)
+                </div>
+            </div>
+            
+        </div>
+
+        <div class = "coin_chart">
+            
+            
+            <div id="container4">
+                <script>
+                    ticker_name = 'LOOM';
+                    var predict = getTickerPredictData(ticker_name);
+                    console.log(predict);
+                    drawChart(ticker_name,predict,'container4');
+                </script> 
+            </div>
+
+            <div id="container5">
+                <script>
+                    ticker_name = 'EOS';
+                    var predict = getTickerPredictData(ticker_name);
+                    console.log(predict);
+                    drawChart(ticker_name,predict,'container5');
+                </script> 
+            </div>   
+            
+            <div id="container6">
+                <script>
+                    ticker_name = 'ETC';
+                    var predict = getTickerPredictData(ticker_name);
+                    console.log(predict);
+                    drawChart(ticker_name,predict,'container6');
+                </script> 
+             </div>   
+
+        </div>
+
+
+
+
+    </body>
+
+</html>
