@@ -1,9 +1,10 @@
 import './App.css';
 import React,{useState,useEffect,useReducer} from 'react';
 import axios from 'axios';
-import StudyBoard from './componenets/StudyBoard';
-import CreateArticle from './componenets/CreateArticle';
-import ReadOneArticle from './componenets/ReadOneArticle';
+import StudyBoard from './components/StudyBoard';
+import CreateArticle from './components/CreateArticle';
+import ReadOneArticle from './components/ReadOneArticle';
+import {useCookies} from 'react-cookie';
 
 const initialState={mode:'readMode'}
   
@@ -25,16 +26,21 @@ function App() {
   const [articles,setArticles] = useState([])
   const[state,dispatch] = useReducer(reducer,initialState)
 
+  const[Id,setId] = useState('')
   const[userId,setUserId] = useState('')
   const[title,setTitle] = useState('')
   const[description,setDescription] = useState('')
   const[location,setLocation] = useState('')
   const[gatherMember,setGatherMember] = useState('')
   
+  const[Comments,setComments] = useState([])
+
+  const[token] = useCookies(['mytoken','userId'])
+
   useEffect(()=>{
     axios.get(`http://localhost:8000/api/StudyBoard/`,{
       headers:{
-        'Authorization':`Token 0d6702b069c67a208999afb48b59d6e65593ea35`
+        'Authorization':`Token ${token['mytoken']}`
       }
     })
     .then(resp=>setArticles(resp.data))
@@ -43,23 +49,49 @@ function App() {
   const CreateBtn = ()=>{
     axios.get(`http://localhost:8000/api/StudyBoard/`,{
       headers:{
-        'Authorization':`Token 0d6702b069c67a208999afb48b59d6e65593ea35`
+        'Authorization':`Token ${token['mytoken']}`
       }
     })
     .then(resp=>setArticles(resp.data))
     .then(()=>dispatch({type:'readMode'}))
   }
 
-  const oneArticleReadBtn = (userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember) => {
+  const oneArticleReadBtn = (Id,userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember) => {
+    
+    setId(Id)
     setUserId(userId)
     setTitle(title)
     setDescription(description)
     setLocation(userBigCity+' '+userSmallCity+' '+userDetailCity)
     setGatherMember(gatherMember)
     dispatch({type:'readOneMode'})
+
+    ReadComments(Id)
   }
 
-  console.log(state.mode)
+  const ReadComments = (Id) => {
+
+    axios.get(`http://localhost:8000/api/Comments/${Id}/`,{
+      headers:{
+        'Authorization':`Token ${token['mytoken']}`
+      }
+    })
+    .then(resp=>setComments(resp.data))
+    .catch(errors=>console.log(errors))
+  }
+
+  const CommentBtn =(comment_textfield)=> {
+    
+    const newComment = {'StudyBoard_key':Id,'comment_user':userId,'comment_textfield':comment_textfield}
+    axios.post(`http://localhost:8000/api/Comments/`,
+    newComment,
+    {headers:{'Authorization':`Token ${token['mytoken']}`}}
+    )
+    .then(resp=>ReadComments(Id))
+    .catch(errors=>console.log(errors))
+  }
+
+  // console.log(state.mode)
 
   var header = null;
   var body = null;
@@ -76,10 +108,10 @@ function App() {
     tail = <CreateArticle  CreateBtn={CreateBtn}/>;
   }
   else if(state.mode === 'readOneMode'){
-    console.log(userId,title,description,location,gatherMember)
     header = <h2>Title : {title}</h2>
     body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
-    tail = <ReadOneArticle description={description} location={location} gatherMember={gatherMember}/>
+    tail = <ReadOneArticle description={description} location={location} 
+              gatherMember={gatherMember} Comments={Comments} CommentBtn={CommentBtn}/>
   }
 
   return (
