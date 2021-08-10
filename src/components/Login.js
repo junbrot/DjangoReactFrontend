@@ -10,6 +10,7 @@ function Login() {
     const [usernameCookie,setUsernameCookie] = useCookies(['userId'])
     const [password,setPassword] = useState('')
     const [token,setToken] = useCookies(['mytoken'])
+    const [idCookie,setidCookie]=useCookies(['id'])
 
     let history = useHistory()
 
@@ -20,6 +21,7 @@ function Login() {
         axios.post(`http://localhost:8000/auth/`,body)
         .then(resp=>setToken('mytoken',resp.data.token))
         .then(()=>setUsernameCookie('userId',username))
+        .then(()=>GetUserID())
         .catch(error=>console.log(error))
     }
 
@@ -29,6 +31,17 @@ function Login() {
 
         axios.post(`http://localhost:8000/api/users/`,body)
         .then(()=>loginForGettingToken())
+        .catch(error=>console.log(error))
+    }
+
+    const GetUserID = ()=>{
+        axios.get(`http://localhost:8000/api/users/`)
+        .then((resp)=>{
+            resp.data.map(user=>{
+                if(user.username === username)
+                    setidCookie('id',user.id)
+            })
+        })
         .catch(error=>console.log(error))
     }
 
