@@ -34,8 +34,9 @@ function App() {
   const[gatherMember,setGatherMember] = useState('')
   
   const[Comments,setComments] = useState([])
+  // const[UserWriteComments,setUserWriteComments] = useState([])
 
-  const[token] = useCookies(['mytoken','userId'])
+  const[token] = useCookies(['mytoken','userId','id'])
 
   useEffect(()=>{
     axios.get(`http://localhost:8000/api/StudyBoard/`,{
@@ -65,7 +66,6 @@ function App() {
     setLocation(userBigCity+' '+userSmallCity+' '+userDetailCity)
     setGatherMember(gatherMember)
     dispatch({type:'readOneMode'})
-
     ReadComments(Id)
   }
 
@@ -78,11 +78,19 @@ function App() {
     })
     .then(resp=>setComments(resp.data))
     .catch(errors=>console.log(errors))
+
+    // axios.get(`http://localhost:8000/api/Comments/${Id}/${token['id']}/`,{
+    //   headers:{
+    //     'Authorization':`Token ${token['mytoken']}`
+    //   }
+    // })
+    // .then(resp=>setUserWriteComment(resp.data))
+    // .catch(errors=>console.log(errors))
   }
 
   const CommentBtn =(comment_textfield)=> {
     
-    const newComment = {'StudyBoard_key':Id,'comment_user':userId,'comment_textfield':comment_textfield}
+    const newComment = {'StudyBoard_key':Id,'comment_user':token['userId'],'comment_textfield':comment_textfield,'User_key':token['id']}
     axios.post(`http://localhost:8000/api/Comments/`,
     newComment,
     {headers:{'Authorization':`Token ${token['mytoken']}`}}
