@@ -21,8 +21,9 @@ function StudyBoard(props) {
                 {props.articles && props.articles.map(article=>{
                     return(
                         <tr key={article.StudyBoard_key} 
-                            onClick={()=>{props.oneArticleReadBtn(article.StudyBoard_key,article.userId,article.title,article.description,article.userBigCity
-                                    ,article.userSmallCity,article.userDetailCity,article.gatherMember)}}>
+                            // onClick={()=>{props.oneArticleReadBtn(article.StudyBoard_key,article.userId,article.title,article.description,article.userBigCity
+                                    // ,article.userSmallCity,article.userDetailCity,article.gatherMember)}}>
+                            onClick={()=>props.oneArticleReadBtn(article)}>
                         <td>{article.userId}</td>
                         <td>{article.title}</td>
                         <td>{article.userBigCity} {article.userSmallCity} {article.userDetailCity}</td>

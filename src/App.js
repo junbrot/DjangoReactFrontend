@@ -18,6 +18,8 @@ const reducer = (state,action) => {
       return {mode:'updateMode'}
     case 'readOneMode':
       return {mode:'readOneMode'}
+    default :
+      return {mode:'readMode'}
   }
 }
 
@@ -31,10 +33,8 @@ function App() {
   const[title,setTitle] = useState('')
   const[description,setDescription] = useState('')
   const[location,setLocation] = useState('')
-  const[gatherMember,setGatherMember] = useState('')
-  
+  const[gatherMember,setGatherMember] = useState('')  
   const[Comments,setComments] = useState([])
-  // const[UserWriteComments,setUserWriteComments] = useState([])
 
   const[token] = useCookies(['mytoken','userId','id'])
 
@@ -57,20 +57,19 @@ function App() {
     .then(()=>dispatch({type:'readMode'}))
   }
 
-  const oneArticleReadBtn = (Id,userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember) => {
-    
-    setId(Id)
-    setUserId(userId)
-    setTitle(title)
-    setDescription(description)
-    setLocation(userBigCity+' '+userSmallCity+' '+userDetailCity)
-    setGatherMember(gatherMember)
+  const oneArticleReadBtn = (Article) => {
+    // Id,userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember
+    setId(Article.StudyBoard_key)
+    setUserId(Article.userId)
+    setTitle(Article.title)
+    setDescription(Article.description)
+    setLocation(Article.userBigCity+' '+Article.userSmallCity+' '+Article.userDetailCity)
+    setGatherMember(Article.gatherMember)
     dispatch({type:'readOneMode'})
-    ReadComments(Id)
+    ReadComments(Article.StudyBoard_key)
   }
 
   const ReadComments = (Id) => {
-
     axios.get(`http://localhost:8000/api/Comments/${Id}/`,{
       headers:{
         'Authorization':`Token ${token['mytoken']}`
@@ -78,14 +77,6 @@ function App() {
     })
     .then(resp=>setComments(resp.data))
     .catch(errors=>console.log(errors))
-
-    // axios.get(`http://localhost:8000/api/Comments/${Id}/${token['id']}/`,{
-    //   headers:{
-    //     'Authorization':`Token ${token['mytoken']}`
-    //   }
-    // })
-    // .then(resp=>setUserWriteComment(resp.data))
-    // .catch(errors=>console.log(errors))
   }
 
   const CommentBtn =(comment_textfield)=> {
@@ -99,7 +90,24 @@ function App() {
     .catch(errors=>console.log(errors))
   }
 
-  // console.log(state.mode)
+  const ModifyBtn = (Comment) => {
+
+    axios.put(`http://localhost:8000/api/Comments/${Id}/${Comment.id}/`,
+    Comment,
+    {headers:{'Authorization':`Token ${token['mytoken']}`}}
+    )
+    .then(resp=>ReadComments(Id))
+    .catch(errors=>console.log(errors))
+  }
+
+  const DeleteBtn = (comment_id) => {
+    
+    axios.delete(`http://localhost:8000/api/Comments/${Id}/${comment_id}`,
+      {headers:{'Authorization':`Token ${token['mytoken']}`}}
+    ).then(resp=>ReadComments(Id))
+    .catch(errors=>console.log(errors))
+  }
+
 
   var header = null;
   var body = null;
@@ -118,8 +126,8 @@ function App() {
   else if(state.mode === 'readOneMode'){
     header = <h2>Title : {title}</h2>
     body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
-    tail = <ReadOneArticle description={description} location={location} 
-              gatherMember={gatherMember} Comments={Comments} CommentBtn={CommentBtn}/>
+    tail = <ReadOneArticle description={description} location={location} gatherMember={gatherMember} 
+              Comments={Comments} CommentBtn={CommentBtn} ModifyBtn={ModifyBtn} DeleteBtn={DeleteBtn}/>
   }
 
   return (
