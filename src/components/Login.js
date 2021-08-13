@@ -2,54 +2,52 @@ import React,{useState,useEffect} from 'react'
 import axios from 'axios'
 import {useCookies} from 'react-cookie'
 import {useHistory} from 'react-router-dom'
+import LoginAPI from '../API/LoginAPI'
 
 function Login() {
 
     const [haveID,setHaveID] = useState(true)
     const [username,setUsername] = useState('')
-    const [usernameCookie,setUsernameCookie] = useCookies(['userId'])
     const [password,setPassword] = useState('')
+    
+    const [usernameCookie,setUsernameCookie] = useCookies(['userId'])
     const [token,setToken] = useCookies(['mytoken'])
-    const [idCookie,setidCookie]=useCookies(['id'])
+    const [idCookie,setIdCookie]=useCookies(['id'])
+
 
     let history = useHistory()
-
-    const loginForGettingToken =()=>{
-        
-        const body = {username,password}
-
-        axios.post(`http://localhost:8000/auth/`,body)
-        .then(resp=>setToken('mytoken',resp.data.token))
-        .then(()=>setUsernameCookie('userId',username))
-        .then(()=>GetUserID())
-        .catch(error=>console.log(error))
-    }
-
-    const CreateIDForGettingToken =()=>{
-
-        const body = {username,password}
-
-        axios.post(`http://localhost:8000/api/users/`,body)
-        .then(()=>loginForGettingToken())
-        .catch(error=>console.log(error))
-    }
-
-    const GetUserID = ()=>{
-        axios.get(`http://localhost:8000/api/users/`)
-        .then((resp)=>{
-            resp.data.map(user=>{
-                if(user.username === username)
-                    setidCookie('id',user.id)
-            })
-        })
-        .catch(error=>console.log(error))
-    }
-
+    
     useEffect(()=>{
         if(token['mytoken']){
             history.push('/StudyBoard')
         }
     },[token])
+
+    const loginForGettingToken =()=>{
+        
+        const body = {username,password}
+
+        LoginAPI.loginForGettingToken(body)
+        .then(resp=>setToken('mytoken',resp.data.token))
+        .catch(error=>alert("wrong password"))
+        
+        setUsernameCookie('userId',username)
+        GetUserID()
+    }
+
+    const CreateIDForGettingToken =()=>{
+
+        const body = {username,password}
+        LoginAPI.CreateIDForGettingToken(body)
+        .then(()=>loginForGettingToken())
+        .catch(error=>console.log(error))
+    }
+
+    const GetUserID = ()=>{
+        LoginAPI.GetUserID(username)
+        .then(resp=>setIdCookie('id',resp.data['id']))
+        .catch(error=>console.log(error))
+    }
 
     return (
         <div className="Login">

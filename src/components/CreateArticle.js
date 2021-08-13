@@ -1,63 +1,97 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import {useCookies} from 'react-cookie';
 import axios from 'axios';
 
 function CreateArticle(props) {
     
-    const[token] = useCookies(['mytoken','userId'])
+    const[token] = useCookies(['mytoken','userId','id'])
     const[title,setTitle] = useState('')
     const[description,setDescription] = useState('')
-    const[userBigCity,setUserBigCity] = useState('서울')
-    const[userSmallCity,setUserSmallCity] = useState('강서구')
-    const[userDetailCity,setUserDetailCity] = useState('')
+    // const[userBigCity,setUserBigCity] = useState('서울')
+    // const[userSmallCity,setUserSmallCity] = useState('강서구')
+    // const[userDetailCity,setUserDetailCity] = useState('')
     const[gatherMember,setGatherMember] = useState('')
 
-    const BigCity = [
-        {id:1,name:'서울'},
-        {id:2,name:'     '},
-    ]
+    // const BigCity = [
+    //     {id:1,name:'서울'},
+    //     {id:2,name:'     '},
+    // ]
 
-    const SmallCity = [
-        {id:1,name:'강서구'},
-        {id:2,name:'양천구'},
-        {id:3,name:'구로구'},
-        {id:4,name:'영등포구'},
-        {id:5,name:'금천구'},
-        {id:6,name:'동작구'},
-        {id:7,name:'관악구'},
-        {id:8,name:'서초구'},
-        {id:9,name:'강남구'},
-        {id:10,name:'송파구'},
-        {id:11,name:'강동구'},
-        {id:12,name:'광진구'},
-        {id:13,name:'성동구'},
-        {id:14,name:'용산구'},
-        {id:15,name:'마포구'},
-        {id:16,name:'은평구'},
-        {id:17,name:'서대문구'},
-        {id:18,name:'중구'},
-        {id:19,name:'종로구'},
-        {id:22,name:'노원구'},
-        {id:23,name:'강북구'},
-        {id:24,name:'성북구'},
-        {id:25,name:'도봉구'},
-        {id:26,name:'     '},
-    ]
+    // const SmallCity = [
+    //     {id:1,name:'강서구'},
+    //     {id:2,name:'양천구'},
+    //     {id:3,name:'구로구'},
+    //     {id:4,name:'영등포구'},
+    //     {id:5,name:'금천구'},
+    //     {id:6,name:'동작구'},
+    //     {id:7,name:'관악구'},
+    //     {id:8,name:'서초구'},
+    //     {id:9,name:'강남구'},
+    //     {id:10,name:'송파구'},
+    //     {id:11,name:'강동구'},
+    //     {id:12,name:'광진구'},
+    //     {id:13,name:'성동구'},
+    //     {id:14,name:'용산구'},
+    //     {id:15,name:'마포구'},
+    //     {id:16,name:'은평구'},
+    //     {id:17,name:'서대문구'},
+    //     {id:18,name:'중구'},
+    //     {id:19,name:'종로구'},
+    //     {id:22,name:'노원구'},
+    //     {id:23,name:'강북구'},
+    //     {id:24,name:'성북구'},
+    //     {id:25,name:'도봉구'},
+    //     {id:26,name:'     '},
+    // ]
     
     const CreateBtn = () =>{
         
         const userId = token['userId']
         const mytoken = token['mytoken']
-        const newArticle = {userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember}
-
-        console.log(newArticle)
-
+        const User_key = token['id']
+        const newArticle = {
+            'User_key': User_key,
+            //  userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember
+            userId,title,description,gatherMember
+        }
+        
         axios.post(`http://localhost:8000/api/StudyBoard/`,
             newArticle,
             {headers:{'Authorization':`Token ${mytoken}`}}
-        ).then(()=>props.CreateBtn())
+        ).then(()=>props.RefreshBtn())
     }
 
+    const ModifyBtn = () =>{
+        
+        const userId = token['userId']
+        const mytoken = token['mytoken']
+        const User_key = token['id']
+        const ModifiedArticle = {
+            'User_key': User_key,
+            //  userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember
+            userId,title,description,gatherMember
+        }
+
+        props.ModifyBtn(ModifiedArticle)
+    }
+    
+    useEffect(()=>{
+        if(props.ArticleInfo)
+        {
+            setTitle(props.ArticleInfo.title)
+            setDescription(props.ArticleInfo.description)
+            // setUserBigCity(props.ArticleInfo.userBigCity)
+            // setUserSmallCity(props.ArticleInfo.userSmallCity)
+            // setUserDetailCity(props.ArticleInfo.userDetailCity)
+            setGatherMember(props.ArticleInfo.gatherMember)
+        }
+    },[])
+
+    const DeleteBtn = () => {
+
+        props.DeleteBtn()
+    }
+    
     return (
         
         <div className="CreateArticle">
@@ -65,20 +99,20 @@ function CreateArticle(props) {
             <div className="mb-3">
             <label htmlFor="Title" className="form-label">Title</label>
             <input type="text" className="form-control" id="title" placeholder="Please Enter The Title"
-                onChange={(e)=>setTitle(e.target.value)}/>
+                 value={title} onChange={(e)=>setTitle(e.target.value)}/>
             </div>
             
             <div className="mb-3">
             <label htmlFor="Description" className="form-label">Description</label>
             <textarea className="form-control" id="description" rows="5"
-                onChange = {e=>setDescription(e.target.value)}/>
+                value={description} onChange = {e=>setDescription(e.target.value)}/>
             </div>
 
-            <br/>
+            {/* <br/>
             <div className="row">
                 <div className="col-sm-2">
                 <label htmlFor="BigCity" className="form-label" >BigCity :</label>
-                <select style={{marginLeft:"10px"}} onChange={e=>setUserBigCity(e.target.value)}>
+                <select style={{marginLeft:"10px"}} value={userBigCity} onChange={e=>setUserBigCity(e.target.value)}>
                     {BigCity.map(city=>{
                         return <option key={city.id}>{city.name}</option>
                     })}
@@ -87,7 +121,7 @@ function CreateArticle(props) {
 
                 <div className="col-sm-2">
                 <label htmlFor="smallCity" className="form-label">smallCity :</label>
-                <select style={{marginLeft:"10px"}} onChange={e=>setUserSmallCity(e.target.value)}>
+                <select style={{marginLeft:"10px"}} value={userSmallCity} onChange={e=>setUserSmallCity(e.target.value)}>
                     {SmallCity.map(city=>{
                         return <option key={city.id}>{city.name}</option>
                     })}
@@ -100,26 +134,33 @@ function CreateArticle(props) {
                 <div className="col-sm-6">
                 <label htmlFor="detailCity" className="form-label">detailCity :</label>
                 <input type="text" className="form-control" id="Detail" placeholder="Write Detail..." 
-                    onChange={e=>setUserDetailCity(e.target.value)}>
+                    value={userDetailCity} onChange={e=>setUserDetailCity(e.target.value)}>
                 </input>
                 </div>
-            </div>
+            </div> */}
             
             <br/>
             <div className="row">     
                 <div className="col-sm-6">
                 <label htmlFor="gatherMember" className="form-label">Gather Member(including you) :</label>
                 <input type="number" className="form-control" id="Gather" placeholder="Number only..." 
-                    onChange={e=>setGatherMember(e.target.value)}>
+                    value={gatherMember} onChange={e=>setGatherMember(e.target.value)}>
                 </input>
                 </div>
             </div>
-            
+                
             <br/>
-            <div className="d-flex justify-content-start">
-            <button className="btn-lg btn-success" onClick={CreateBtn}>Submit</button>
-            </div>
-
+            
+            {props.ArticleInfo
+                ?<div className="d-flex justify-content-start">
+                <button className="btn-lg btn-success" onClick={ModifyBtn}>Modify</button>
+                <button className="btn-lg btn-danger" onClick={DeleteBtn}>Delete</button>
+                </div>
+            
+                :<div className="d-flex justify-content-start">
+                <button className="btn-lg btn-success" onClick={CreateBtn}>Submit</button>
+                </div>
+            }   
         </div>
     )
 }

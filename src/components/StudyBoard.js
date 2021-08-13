@@ -8,11 +8,13 @@ function StudyBoard(props) {
             <Table striped bordered hover variant="dark" size="sm">
                 
                 <thead>
-                <tr>
+                <tr className="text-center">
                     <th>ID</th>
                     <th>Title</th>
-                    <th>Location</th>
+                    {/* <th>Location</th> */}
                     <th>gatherMember</th>
+                    <th>Apply</th>
+                    <th>upload</th>
                 </tr>
                 </thead>
                 
@@ -20,14 +22,14 @@ function StudyBoard(props) {
                 
                 {props.articles && props.articles.map(article=>{
                     return(
-                        <tr key={article.StudyBoard_key} 
-                            // onClick={()=>{props.oneArticleReadBtn(article.StudyBoard_key,article.userId,article.title,article.description,article.userBigCity
-                                    // ,article.userSmallCity,article.userDetailCity,article.gatherMember)}}>
+                        <tr className="text-center" key={article.StudyBoard_key} 
                             onClick={()=>props.oneArticleReadBtn(article)}>
                         <td>{article.userId}</td>
                         <td>{article.title}</td>
-                        <td>{article.userBigCity} {article.userSmallCity} {article.userDetailCity}</td>
+                        {/* <td>{article.userBigCity} {article.userSmallCity} {article.userDetailCity}</td> */}
                         <td>{article.gatherMember}</td>
+                        <td>{article.ApplyMember}</td>
+                        <td>{article.uploadDate}</td>
                         </tr>
                     )})
                 }

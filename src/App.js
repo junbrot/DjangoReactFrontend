@@ -5,6 +5,10 @@ import StudyBoard from './components/StudyBoard';
 import CreateArticle from './components/CreateArticle';
 import ReadOneArticle from './components/ReadOneArticle';
 import {useCookies} from 'react-cookie';
+import {useHistory} from 'react-router-dom'
+import StudyBoardAPI from './API/StudyBoardAPI';
+import CommentAPI from './API/CommentAPI';
+import ApplicantAPI from './API/ApplicantAPI';
 
 const initialState={mode:'readMode'}
   
@@ -24,90 +28,167 @@ const reducer = (state,action) => {
 }
 
 function App() {
-  
+  let history = useHistory()
   const [articles,setArticles] = useState([])
+  const [article,setArticle] = useState('')
   const[state,dispatch] = useReducer(reducer,initialState)
-
-  const[Id,setId] = useState('')
-  const[userId,setUserId] = useState('')
-  const[title,setTitle] = useState('')
-  const[description,setDescription] = useState('')
-  const[location,setLocation] = useState('')
-  const[gatherMember,setGatherMember] = useState('')  
   const[Comments,setComments] = useState([])
+  const[Applicants,setApplicants] = useState([])
 
-  const[token] = useCookies(['mytoken','userId','id'])
-
+  const [token,setToken, removeToken] = useCookies(['mytoken','userId','id'])
+  const[studyID,setStudyID] = useState('')
+  
   useEffect(()=>{
-    axios.get(`http://localhost:8000/api/StudyBoard/`,{
-      headers:{
-        'Authorization':`Token ${token['mytoken']}`
+
+    StudyBoardAPI.getStudyMemberID(token['id'],token['mytoken'])
+    .then(resp=>{
+      try{
+        if(resp.data[0]){
+          setStudyID(resp.data[0].Study_key)
+        }
       }
+      catch{}
     })
-    .then(resp=>setArticles(resp.data))
+    .catch(error=>console.log(error))
+
+    StudyBoardAPI.getStudyBoardList(token['mytoken'])
+      .then(resp=>setArticles(resp.data))
+      .catch(error=>console.log(error))
+
   },[])
   
-  const CreateBtn = ()=>{
-    axios.get(`http://localhost:8000/api/StudyBoard/`,{
-      headers:{
-        'Authorization':`Token ${token['mytoken']}`
-      }
-    })
+  const logoutBtn = () => {
+    removeToken('id')
+    removeToken('userId')
+    removeToken('mytoken')
+    alert("Logout")
+    history.push('/') 
+  }
+
+  const MyStudyBtn = () => {
+    console.log("get in")
+    history.push('/Study')  
+  }
+
+  const RefreshBtn = ()=>{
+    StudyBoardAPI.getStudyBoardList(token['mytoken'])
     .then(resp=>setArticles(resp.data))
     .then(()=>dispatch({type:'readMode'}))
   }
 
+  const ModifyBtn = (ModifiedArticle) => {
+
+    ModifiedArticle['StudyBoard_key'] = article.StudyBoard_key
+    StudyBoardAPI.ModifyBtn(ModifiedArticle,article.StudyBoard_key,token['mytoken'])
+    .then(()=>RefreshBtn())
+    .catch(errors=>console.log(errors))
+  }
+
+  const DeleteBtn = () => {
+
+    StudyBoardAPI.DeleteBtn(article.StudyBoard_key,token['mytoken'])
+    .then(()=>RefreshBtn())
+    .catch(errors=>console.log(errors))
+  }
+
   const oneArticleReadBtn = (Article) => {
-    // Id,userId,title,description,userBigCity,userSmallCity,userDetailCity,gatherMember
-    setId(Article.StudyBoard_key)
-    setUserId(Article.userId)
-    setTitle(Article.title)
-    setDescription(Article.description)
-    setLocation(Article.userBigCity+' '+Article.userSmallCity+' '+Article.userDetailCity)
-    setGatherMember(Article.gatherMember)
+    setArticle(Article)
     dispatch({type:'readOneMode'})
     ReadComments(Article.StudyBoard_key)
+    ReadApplicants(Article.StudyBoard_key)
   }
 
   const ReadComments = (Id) => {
-    axios.get(`http://localhost:8000/api/Comments/${Id}/`,{
-      headers:{
-        'Authorization':`Token ${token['mytoken']}`
-      }
-    })
+    CommentAPI.ReadComments(Id,token['mytoken'])
     .then(resp=>setComments(resp.data))
     .catch(errors=>console.log(errors))
   }
 
-  const CommentBtn =(comment_textfield)=> {
+  const PostCommentBtn =(comment_textfield)=> {
+    const newComment = {'StudyBoard_key':article.StudyBoard_key,'comment_user':token['userId'],'comment_textfield':comment_textfield,'User_key':token['id']}
+    CommentAPI.PostCommentBtn(newComment,token['mytoken'])
+    .then(resp=>ReadComments(article.StudyBoard_key))
+    .catch(errors=>console.log(errors))
+  }
+
+  const ModifyCommentBtn = (Comment) => {
+    CommentAPI.ModifyCommentBtn(Comment,article.StudyBoard_key,Comment.id,token['mytoken'])
+    .then(resp=>ReadComments(article.StudyBoard_key))
+    .catch(errors=>console.log(errors))
+  }
+
+  const DeleteCommentBtn = (comment_id) => {
+    CommentAPI.DeleteCommentBtn(comment_id,article.StudyBoard_key,token['mytoken'])
+    .then(resp=>ReadComments(article.StudyBoard_key))
+    .catch(errors=>console.log(errors))
+  }
+
+  const ModifyOneArticleBtn = () => {
+    dispatch({type:'updateMode'})
+  }
+
+  const ReadApplicants = (Id) => {
+    ApplicantAPI.ReadApplicants(Id,token['mytoken'])
+    .then(resp=>setApplicants(resp.data))
+    .catch(errors=>console.log(errors))
+  }
+
+  const ApplicantBtn = () => {
+
+    var info = null;
+    StudyBoardAPI.getOneStudyBoard(token['mytoken'],article.StudyBoard_key)
+    .then(resp=>info = resp.data)
+    .catch(error=>console.log(error))
+    .then(()=>{
+      if(info.gatherMember > info.ApplyMember)
+      {
+        var userKey = token['id']
+        const newApply = {'StudyBoard_key':article.StudyBoard_key,'apply_user':token['userId'],'User_key':Number(userKey)}
+      
+        ApplicantAPI.ApplicantBtn(article.StudyBoard_key,newApply,token['mytoken'])
+        .then(()=>{
+          ReadApplicants(article.StudyBoard_key)
+          info['ApplyMember'] += 1 
+          StudyBoardAPI.ModifyBtn(info,article.StudyBoard_key,token['mytoken'])
+          article.ApplyMember += 1
+        })
+        .catch(errors=>alert("Register allows only one time"))
+      }
+      else{
+        alert("full")
+      }
+    })
     
-    const newComment = {'StudyBoard_key':Id,'comment_user':token['userId'],'comment_textfield':comment_textfield,'User_key':token['id']}
-    axios.post(`http://localhost:8000/api/Comments/`,
-    newComment,
-    {headers:{'Authorization':`Token ${token['mytoken']}`}}
-    )
-    .then(resp=>ReadComments(Id))
-    .catch(errors=>console.log(errors))
   }
 
-  const ModifyBtn = (Comment) => {
-
-    axios.put(`http://localhost:8000/api/Comments/${Id}/${Comment.id}/`,
-    Comment,
-    {headers:{'Authorization':`Token ${token['mytoken']}`}}
-    )
-    .then(resp=>ReadComments(Id))
-    .catch(errors=>console.log(errors))
+  const FinishGatheringBtn =()=> {
+    console.log(Applicants)
+    var userKey = token['id']
+    // 나중에 StudyBoard 삭제 기능까지 추가    
+    var Study_id = 0
+    ApplicantAPI.PostStudyMaster(Number(userKey),token['mytoken'])
+    .then(resp=>Study_id=resp.data['id'])
+    .catch(error=>console.log(error))
+    .then(()=>FinishGatheringBtn2(Study_id))
   }
 
-  const DeleteBtn = (comment_id) => {
+  const FinishGatheringBtn2 =(Study_id)=> {
     
-    axios.delete(`http://localhost:8000/api/Comments/${Id}/${comment_id}`,
-      {headers:{'Authorization':`Token ${token['mytoken']}`}}
-    ).then(resp=>ReadComments(Id))
-    .catch(errors=>console.log(errors))
+    setStudyID(Study_id)
+    ApplicantAPI.PostStudyMember(Study_id,Number(token['id']),token['mytoken'])
+    .then(()=>FinishGatheringBtn3(Study_id))
+    .catch(errors=>console.log("PostStudyMember Error"))
   }
 
+  const FinishGatheringBtn3 = (Study_id) => {
+
+    Applicants.map(Applicant=>{
+      ApplicantAPI.PostStudyMember(Study_id,Applicant.User_key,token['mytoken'])
+      .catch(error => console.log(error))
+    })
+
+    RefreshBtn()
+  }
 
   var header = null;
   var body = null;
@@ -115,25 +196,36 @@ function App() {
 
   if(state.mode === 'readMode'){
     header = <h2>스터디 게시판</h2>;
-    body = <div><button className="btn btn-success" onClick={()=>dispatch({type:'createMode'})}>Create Study</button></div>;
-    tail = <StudyBoard articles={articles} oneArticleReadBtn={oneArticleReadBtn}/>;
+    
+    if(studyID)
+      body = <div><button className="btn btn-primary" onClick={MyStudyBtn}>My Study</button></div>;
+    else
+      body = <div><button className="btn btn-success" onClick={()=>dispatch({type:'createMode'})}>Create StudyBoard</button></div>;
+      tail = <StudyBoard articles={articles} oneArticleReadBtn={oneArticleReadBtn}/>;
   }
   else if(state.mode === 'createMode'){
     header = <h2>스터디 게시글 생성</h2>;
     body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
-    tail = <CreateArticle  CreateBtn={CreateBtn}/>;
+    tail = <CreateArticle  RefreshBtn={RefreshBtn}/>;
   }
   else if(state.mode === 'readOneMode'){
-    header = <h2>Title : {title}</h2>
+    header = <h2>Title : {article.title}</h2>
     body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
-    tail = <ReadOneArticle description={description} location={location} gatherMember={gatherMember} 
-              Comments={Comments} CommentBtn={CommentBtn} ModifyBtn={ModifyBtn} DeleteBtn={DeleteBtn}/>
+    tail = <ReadOneArticle ArticleInfo={article} ModifyOneArticleBtn={ModifyOneArticleBtn}
+              Comments={Comments} PostCommentBtn={PostCommentBtn} ModifyCommentBtn={ModifyCommentBtn} DeleteCommentBtn={DeleteCommentBtn}
+              Applicants={Applicants} ApplicantBtn={ApplicantBtn} FinishGatheringBtn={FinishGatheringBtn}/>
+  }      
+  else if(state.mode==='updateMode'){
+    header = <h2>스터디 게시글 수정</h2>;
+    body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
+    tail = <CreateArticle  ModifyBtn={ModifyBtn} ArticleInfo={article} DeleteBtn={DeleteBtn}/>;
   }
 
   return (
     <div className="App">
       
       <div className="row">
+        <div><button className="btn btn-danger" onClick={()=>logoutBtn()}>Logout/Refresh</button></div>
         <div className="d-flex justify-content-center">
         {header}
         </div>
