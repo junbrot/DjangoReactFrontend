@@ -46,32 +46,10 @@ function ReadOneArticle(props) {
     const ApplicantBtn = () => {
         props.ApplicantBtn()
     }
-
-    // const ApplicantUserCommit = (Applicant) => {
-        // props.ApplicantUserCommit(Applicant)
-    // }
-
-    // const ApplicantUserDelete = (Applicant) => {
-        // props.ApplicantUserDelete(Applicant)
-    // }
-    
+  
     const FinishGatheringBtn = () =>{
-        
-        var Applicants = []
-        props.Applicants.map(Applicant=>{
-            if(Applicant.condition === 1){    
-                Applicants = [...Applicants,Applicant]
-            }
-        })
-        console.log(Applicants)
-        props.FinishGatheringBtn(Applicants)
+        props.FinishGatheringBtn()
     }
-
-    // var commited_cnt = 1;
-    // props.Applicants.map(Applicant=>{
-        // if(Applicant.condition === 1)
-            // commited_cnt+=1;
-    // })
 
     return (
 
@@ -82,12 +60,6 @@ function ReadOneArticle(props) {
                 <h3 style={{color:"#282c34"}}>{props.ArticleInfo.description}</h3>
                 </div>
 
-                {/* <br/>
-                <h4>location : </h4>
-                <div className="card bg-light">
-                <h4 style={{color:"#282c34"}}>{props.ArticleInfo.location}</h4>
-                </div> */}
-
                 <br/>
                 <h4>gatherMember : </h4>
                 <div className="card bg-light">
@@ -96,16 +68,9 @@ function ReadOneArticle(props) {
 
                 <br/>
                 <h4>Applicants : {props.ArticleInfo.ApplyMember}</h4>
-                {/* {props.Applicants
-                ?<div>
-                    <h4>Applicants : {props.Applicants.length+1}</h4>
-                    <h4>Commited : {commited_cnt}</h4>
-                </div>
-                
-                :<div>
-                    <p>Applicants : 1</p>
-                </div>
-                } */}
+
+                <br/>
+                <h4>duration : {props.ArticleInfo.duration} days</h4>
 
                 <br/>
                 <br/>
@@ -115,44 +80,8 @@ function ReadOneArticle(props) {
                         return(
                             <div key={Applicant.id}>
                                 <li  style={{fontSize:"25px"}}>user : {Applicant.apply_user}</li>
-                                {/* <div className="d-flex"> */}
-                                {/* <button className="btn btn-outline-info btn-sm" onClick={()=>ApplicantUserCommit(Applicant)}>commit</button><br/> */}
-                                {/* <button className="btn btn-outline-danger btn-sm" onClick={()=>ApplicantUserDelete(Applicant)}>delete</button><br/> */}
-                                {/* </div> */}
                             </div>
                         )
-
-                        // if(Applicant.condition === 0){
-                        //     return(
-                        //         <div key={Applicant.id}>
-                        //             <li  style={{fontSize:"25px"}}>user : {Applicant.apply_user}</li>
-                        //             {/* <div className="d-flex"> */}
-                        //             {/* <button className="btn btn-outline-info btn-sm" onClick={()=>ApplicantUserCommit(Applicant)}>commit</button><br/> */}
-                        //             {/* <button className="btn btn-outline-danger btn-sm" onClick={()=>ApplicantUserDelete(Applicant)}>delete</button><br/> */}
-                        //             {/* </div> */}
-                        //         </div>
-                        //     )
-                        // }
-                        // else if(Applicant.condition === 1){
-                        //     return(
-                        //         <div key={Applicant.id}>
-                        //             <li  style={{fontSize:"25px"}}>user : {Applicant.apply_user} (Committed)</li>
-                        //             <div className="d-flex">
-                        //             <button className="btn btn-outline-danger btn-sm" onClick={()=>ApplicantUserDelete(Applicant)}>delete</button><br/>
-                        //             </div>
-                        //         </div>
-                        //     )
-                        // }
-                        // else if (Applicant.condition === 2){
-                        //     return(
-                        //         <div key={Applicant.id}>
-                        //             <li  style={{fontSize:"25px"}}>user : {Applicant.apply_user} (Deleted)</li>
-                        //             <div className="d-flex">
-                        //             <button className="btn btn-outline-info btn-sm" onClick={()=>ApplicantUserCommit(Applicant)}>commit</button><br/>
-                        //             </div>
-                        //         </div>
-                        //     )
-                        // }
                     })
                     :null
                 }

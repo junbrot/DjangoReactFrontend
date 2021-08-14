@@ -26,8 +26,8 @@ export default class ApplicantAPI{
     //     })
     // }
 
-    static PostStudyMaster(userKey,token){
-        return axios.post(`http://localhost:8000/api/Studys/`,{'User_key':userKey},{
+    static PostStudyMaster(StudyInfo,token){
+        return axios.post(`http://localhost:8000/api/Studys/`,StudyInfo,{
             headers:{'Authorization':`Token ${token}`}
         })
     }

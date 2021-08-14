@@ -9,6 +9,7 @@ import {useHistory} from 'react-router-dom'
 import StudyBoardAPI from './API/StudyBoardAPI';
 import CommentAPI from './API/CommentAPI';
 import ApplicantAPI from './API/ApplicantAPI';
+import StudyAPI from './API/StudyAPI';
 
 const initialState={mode:'readMode'}
   
@@ -34,13 +35,13 @@ function App() {
   const[state,dispatch] = useReducer(reducer,initialState)
   const[Comments,setComments] = useState([])
   const[Applicants,setApplicants] = useState([])
-
+  
   const [token,setToken, removeToken] = useCookies(['mytoken','userId','id'])
   const[studyID,setStudyID] = useState('')
   
   useEffect(()=>{
 
-    StudyBoardAPI.getStudyMemberID(token['id'],token['mytoken'])
+    StudyAPI.getStudyMemberID(token['id'],token['mytoken'])
     .then(resp=>{
       try{
         if(resp.data[0]){
@@ -52,8 +53,8 @@ function App() {
     .catch(error=>console.log(error))
 
     StudyBoardAPI.getStudyBoardList(token['mytoken'])
-      .then(resp=>setArticles(resp.data))
-      .catch(error=>console.log(error))
+    .then(resp=>setArticles(resp.data))
+    .catch(error=>console.log(error))
 
   },[])
   
@@ -66,7 +67,6 @@ function App() {
   }
 
   const MyStudyBtn = () => {
-    console.log("get in")
     history.push('/Study')  
   }
 
@@ -163,10 +163,10 @@ function App() {
 
   const FinishGatheringBtn =()=> {
     console.log(Applicants)
-    var userKey = token['id']
     // 나중에 StudyBoard 삭제 기능까지 추가    
+    var StudyInfo = {'User_key':Number(token['id']),'title':article.title,'duration':article.duration}
     var Study_id = 0
-    ApplicantAPI.PostStudyMaster(Number(userKey),token['mytoken'])
+    ApplicantAPI.PostStudyMaster(StudyInfo,token['mytoken'])
     .then(resp=>Study_id=resp.data['id'])
     .catch(error=>console.log(error))
     .then(()=>FinishGatheringBtn2(Study_id))
@@ -198,7 +198,7 @@ function App() {
     header = <h2>스터디 게시판</h2>;
     
     if(studyID)
-      body = <div><button className="btn btn-primary" onClick={MyStudyBtn}>My Study</button></div>;
+      body = <div><button className="btn btn-primary btn-sm" onClick={MyStudyBtn}>My Study</button></div>;
     else
       body = <div><button className="btn btn-success" onClick={()=>dispatch({type:'createMode'})}>Create StudyBoard</button></div>;
       tail = <StudyBoard articles={articles} oneArticleReadBtn={oneArticleReadBtn}/>;
@@ -225,7 +225,7 @@ function App() {
     <div className="App">
       
       <div className="row">
-        <div><button className="btn btn-danger" onClick={()=>logoutBtn()}>Logout/Refresh</button></div>
+        <div><button className="btn btn-danger btn-sm" onClick={()=>logoutBtn()}>Logout/Refresh</button></div>
         <div className="d-flex justify-content-center">
         {header}
         </div>
