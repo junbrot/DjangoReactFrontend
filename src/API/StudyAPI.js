@@ -20,6 +20,4 @@ export default class StudyAPI{
             headers:{'Authorization':`Token ${token}`}
         })
     }
-
-
 }

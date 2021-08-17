@@ -2,19 +2,6 @@ import axios from 'axios'
 
 export default class StudyBoardAPI{
 
-    // static getStudyID(id,mytoken){
-
-    //     return axios.get(`http://localhost:8000/api/Studys/${id}/`,{
-    //         headers:{'Authorization':`Token ${mytoken}`}
-    //     })
-    // }
-
-    // static getStudyMemberID(id,token){
-    //     return axios.get(`http://localhost:8000/api/StudyMemberForKey/${id}/`,{
-    //         headers:{'Authorization':`Token ${token}`}
-    //     })
-    // }
-
     static getStudyBoardList(token){
         return axios.get(`http://localhost:8000/api/StudyBoard/`,{
             headers:{'Authorization':`Token ${token}`}
