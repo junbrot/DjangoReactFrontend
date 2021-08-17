@@ -1,11 +1,11 @@
-import React,{useEffect,useState} from 'react'
+import React,{useEffect,useState,useCallback} from 'react'
 import {useCookies} from 'react-cookie';
 import {useHistory} from 'react-router-dom'
 import moment from 'moment';
 import StudyPlannerAPI from '../API/StudyPlannerAPI';
 import StudyAPI from '../API/StudyAPI';
 import StudyPlannersComp from './StudyPlannersComp';
-import StudyPlannersComponentsComp from './StudyPlannersComponentsComp';
+import OneStudyPlannerComp from './OneStudyPlannerComp';
 
 function Study() {
     let history = useHistory()
@@ -26,8 +26,6 @@ function Study() {
     const [ModifyStudyPlannerCond,setModifyStudyPlannerCond] = useState(false)
     const [ModifyStudyPlannerTitle,setModifyStudyPlannerTitle] = useState('')
 
-
-
     const [CreateComponentCond,setCreateComponentCond] = useState(false)
     const [CreateComponentTitle,setCreateComponentTitle] = useState('')
     const [CreateComponentDuration,setCreateComponentDuration] = useState('')
@@ -37,6 +35,32 @@ function Study() {
     const [ModifyComponentTitle,setModifyComponentTitle] = useState('')
     const [ModifyComponentDuration,setModifyComponentDuration] = useState('')
 
+    const GetStudyPlannersComponentFirst = useCallback(async (id,data) => {
+        var allData = []
+
+        data.map(onedata=>{
+            var oneData = onedata
+            var oneComponent
+            StudyPlannerAPI.getStudyPlannerComponent(id,onedata.id,token['mytoken'])
+            .then(resp=>oneComponent=resp.data)
+            .catch(error=>console.log(error))
+            .then(()=>{
+                oneData['component'] = oneComponent
+                allData=[...allData,oneData]
+                setStudyPlanners(allData)
+            })
+            return null;
+        })
+    },[token]);
+
+    const GetStudyPlannersFirst = useCallback(async (id) => {
+        var data
+        StudyPlannerAPI.getStudyPlanner(id,token['mytoken'])
+        .then(resp=>data = resp.data)
+        .catch(error=>console.log(error))
+        .then(()=>GetStudyPlannersComponentFirst(id,data))
+        .then(()=>setStudyPlanners(data))   
+    }, [token,GetStudyPlannersComponentFirst,setStudyPlanners]);
 
     useEffect(()=>{
         
@@ -48,10 +72,10 @@ function Study() {
             StudyAPI.getStudyID(id,token['mytoken'])
             .then(resp=>SetStudyInfo(resp.data))
             .catch(error=>console.log(error))
-            .then(()=>GetStudyPlanners(id))
+            .then(()=>{GetStudyPlannersFirst(id)})
         })
         
-    },[])
+    },[token,GetStudyPlannersFirst])
 
     const logoutBtn = () => {
         removeToken('id')
@@ -72,7 +96,6 @@ function Study() {
         setModifyTitleCond(false)
     } 
 
-
     const CreateStudyPlannerBtn = () => {
         const PlannerInfo = {'Study_key':StudyInfo.id,'User_key':Number(token['id']),'title':studyPlannerTitle,'userId':token['userId']} 
         StudyPlannerAPI.postStudyPlanner(StudyInfo.id,PlannerInfo,token['mytoken'])
@@ -82,7 +105,6 @@ function Study() {
     }
 
     const GetStudyPlanners =(id)=>{
-
         var data
         StudyPlannerAPI.getStudyPlanner(id,token['mytoken'])
         .then(resp=>data = resp.data)
@@ -97,18 +119,17 @@ function Study() {
 
         data.map(onedata=>{
             var oneData = onedata
-            var oneComment
+            var oneComponent
             StudyPlannerAPI.getStudyPlannerComponent(id,onedata.id,token['mytoken'])
-            .then(resp=>oneComment=resp.data)
+            .then(resp=>oneComponent=resp.data)
             .catch(error=>console.log(error))
             .then(()=>{
-                oneData['comment'] = oneComment
+                oneData['component'] = oneComponent
                 allData=[...allData,oneData]
                 setStudyPlanners(allData)
-                return oneData;
             })
+            return null;
         })
-
     }
 
     const OneStudyPlannerBtn=(OneStudyPlanner)=>{
@@ -188,6 +209,7 @@ function Study() {
     }
 
     const FailBtn = (one) => {
+        
         one['condition'] = 2
         StudyPlannerAPI.putComponent(StudyInfo.id,one.StudyPlanner_key,one.id,one,token['mytoken'])
         .then(resp=>GetStudyPlanners(StudyInfo.id))
@@ -199,148 +221,97 @@ function Study() {
 
     if(ModifyTitleAuth){
         ModifyTitleBtn = (modifyTitleCond
-        ?<div><button className="btn btn-success btn-sm" onClick={()=>finishModifyStudyID()}>finish modify</button></div>
-        :<div><button className="btn btn-success btn-sm" onClick={()=>modifyStudyID()}>modify title</button></div>)
+        ?<div><button id="modify_title_Btn" className="btn btn-success btn-sm" onClick={()=>finishModifyStudyID()}>finish modify</button></div>
+        :<div><button id="modify_title_Btn" className="btn btn-success btn-sm" onClick={()=>modifyStudyID()}>modify title</button></div>)
     }
 
     return (
         <div className="App">
             
-            <div className="head">
+            <article id="StudyHead">
                 {modifyTitleCond
-                ?<div className="mb-3">
+                ?<section id="modifyStudyTitle" className="mb-3">
                     <h2 className="form-label">Title :</h2>
                     <input type="text" className="form-control" id="title" placeholder="Please Enter The Title"
                         value={title} onChange={(e)=>setTitle(e.target.value)}/>
-                </div>
+                </section>
                 :<h2 style={{textAlign:"center"}}>{StudyInfo.title}</h2>
                 }
                 
                 <br/>
-                <div className="d-flex justify-content-start"> 
-                    <div style={{paddingRight:"10px"}}><button className="btn btn-danger btn-sm" onClick={()=>logoutBtn()}>Logout/Refresh</button></div>
+                <section id="Logout_Refresh_Btn" className="d-flex justify-content-start"> 
+                    <div style={{paddingRight:"10px"}}>
+                        <button className="btn btn-danger btn-sm" onClick={()=>logoutBtn()}>Logout/Refresh</button></div>
                     {ModifyTitleBtn}
-                </div>
+                </section>
                 
                 <br/>
-                <div>
+                <section id="toStudyBoardBtn">
                     <button className="btn btn-primary btn-sm" onClick={()=>history.push('/StudyBoard')}>StudyBoard</button>
                     <br/><br/>
-                    <h4>Duration : {moment(StudyInfo.StudyStartTime).format('YYYY-MM-DD')} to   
+                    <h4 id="Duration">Duration : {moment(StudyInfo.StudyStartTime).format('YYYY-MM-DD')} to   
                         {' '}{moment(StudyInfo.StudyStartTime).add(StudyInfo.duration,'days').format('YYYY-MM-DD')}</h4>
-                </div>
-            </div>
+                </section>
+            </article>
 
 
             <br/><br/><br/>
-            {createStudyPlannerCond
-            ?<div className="CreatePlannerComponent">
-                <div className="mb-3">
-                    <h2 className="form-label">Planner title :</h2>
-                    <input type="text" className="form-control" placeholder="write title" onChange={e=>setstudyPlannerTitle(e.target.value)}></input><br/>
-                </div>
+            <article id="StudyBody">
+                {createStudyPlannerCond
+                ?<section id="CreateStudyPlanner">
+                    <div className="mb-3">
+                        <h2 className="form-label">Planner title :</h2>
+                        <input type="text" className="form-control" placeholder="write title" onChange={e=>setstudyPlannerTitle(e.target.value)}></input><br/>
+                    </div>
 
-                <br/>
-                <button className="btn btn-primary btn-sm" onClick={CreateStudyPlannerBtn}>Create</button>
-                <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(false)}>back</button>
-            </div>
-            :<button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(true)}>Create Planner Component</button>
-            }
+                    <br/>
+                    <button className="btn btn-primary btn-sm" onClick={CreateStudyPlannerBtn}>Create</button>
+                    <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(false)}>back</button>
+                </section>
+                :<section id="CreateStudyPlannerBtn">
+                    <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(true)}>Create Planner Component</button>
+                </section>
+                }
             
-            <br/><br/><br/>
-            {OneStudyPlannerCond
-            
-            ?<StudyPlannersComponentsComp ModifyStudyPlannerCond={ModifyStudyPlannerCond} ModifyStudyPlannerTitle={ModifyStudyPlannerTitle}
-                setModifyStudyPlannerTitle={setModifyStudyPlannerTitle} StudyPlanner={StudyPlanner} StudyPlanner={StudyPlanner}
-                SuccessBtn={SuccessBtn} FailBtn={FailBtn} ModifyComponentTitle={ModifyComponentTitle} ModifyComponentCond={ModifyComponentCond}
-                ModifyComponentDuration={ModifyComponentDuration} setCreateComponentTitle={setCreateComponentTitle} CreateComponent={CreateComponent}
-                setCreateComponentCond={setCreateComponentCond} setModifyComponentTitle={setModifyComponentTitle} 
-                setModifyComponentDuration={setModifyComponentDuration} ModifyComponent={ModifyComponent} setModifyComponentCond={setModifyComponentCond}
-                ModifyStudyPlanner={ModifyStudyPlanner} setModifyStudyPlannerCond={setModifyStudyPlannerCond} ModifyStudyPlannerBtn={ModifyStudyPlannerBtn}
-                CreateComponentBtn={CreateComponentBtn} setOneStudyPlannerCond={setOneStudyPlannerCond} CreateComponentCond={CreateComponentCond}
-                setCreateComponentDuration={setCreateComponentDuration} DeleteComponentBtn={DeleteComponentBtn} ModifyComponentBtn={ModifyComponentBtn}/>
-            
-            :<StudyPlannersComp StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
-                DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}/>            
-            }
+                <br/><br/><br/>
+                
+                {OneStudyPlannerCond
+                ?<section id="OneStudyPlanner">
+                    
+                    <OneStudyPlannerComp  
+                        StudyPlanner={StudyPlanner} 
+                                        
+                        ModifyStudyPlannerBtn={ModifyStudyPlannerBtn} ModifyStudyPlanner={ModifyStudyPlanner} 
+                        ModifyStudyPlannerCond={ModifyStudyPlannerCond} setModifyStudyPlannerCond={setModifyStudyPlannerCond} 
+                        ModifyStudyPlannerTitle={ModifyStudyPlannerTitle} setModifyStudyPlannerTitle={setModifyStudyPlannerTitle} 
 
+                        CreateComponentBtn={CreateComponentBtn} CreateComponent={CreateComponent} CreateComponentCond={CreateComponentCond} 
+                        setCreateComponentCond={setCreateComponentCond} 
+                        setCreateComponentTitle={setCreateComponentTitle} setCreateComponentDuration={setCreateComponentDuration} 
+                        
+                        ModifyComponentBtn={ModifyComponentBtn} ModifyComponent={ModifyComponent} 
+                        ModifyComponentTitle={ModifyComponentTitle} setModifyComponentTitle={setModifyComponentTitle}
+                        ModifyComponentDuration={ModifyComponentDuration} setModifyComponentDuration={setModifyComponentDuration} 
+                        ModifyComponentCond={ModifyComponentCond} setModifyComponentCond={setModifyComponentCond} 
+                        
+                        DeleteComponentBtn={DeleteComponentBtn} 
+
+                        setOneStudyPlannerCond={setOneStudyPlannerCond} SuccessBtn={SuccessBtn} FailBtn={FailBtn}>
+                    </OneStudyPlannerComp>
+                
+                </section>
+                :<section id="StudyPlanners">
+                    <StudyPlannersComp 
+                        StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
+                        DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
+                    </StudyPlannersComp>            
+                </section>
+                }
+
+            </article>
         </div>
     )
 }
 
-/*
-<div className="row row-cols-5" >
-            {StudyPlanners.map(StudyPlanner=>{ 
-                 
-                return (
-                    <div className="col-sm-4" key={StudyPlanner.id} style={{paddingTop:"10px",paddingBottom:"10px"}}>
-                    <div className="card">
-                        <div className="card-body">
-                            
-                            <h5 className="card-title" style={{color:"black"}}>title : {StudyPlanner.title}</h5>
-                            <h6 className="card-subtitle mb-2 text-muted">{StudyPlanner.userId}</h6>
-                           
-                            <br/>
-                            <br/>
-                           {StudyPlanner.comment
-                            ?StudyPlanner.comment.map(one=>{
-                                
-                                var body
-                                if(one.condition === 0){
-                                    body = <div>
-                                        {one.User_key === Number(token['id'])
-                                            ?
-                                            <div>
-                                                <div className="d-flex justify-content-start" >
-                                                    <div style={{paddingRight:"10px"}}>
-                                                    <button className="btn btn-success btn-sm" onClick={()=>SuccessBtn(one)}>Success</button>
-                                                    </div>
-                                                    <button className="btn btn-primary btn-sm" onClick={()=>FailBtn(one)}>Fail</button>
-                                                </div>
-                                            </div>
-                                            :null
-                                        }
-                                    </div>
-                                }
-                                else if(one.condition === 1){
-                                    body = <h6 style={{'color':'green'}}>success</h6>
-                                }
-                                else{
-                                    body = <h6 style={{'color':'red'}}>fail</h6>
-                                }
-
-                                return(
-                                    <div className="card-body" key={one.id.toString()}style={{color:"black",border:"1px solid black"}}>
-                                        <h5>{one.title}</h5>
-                                        <h6>{one.userId} / {moment(one.StudyPlannerComponentStartTime).format('MM-DD')}
-                                        {' '} to {' '}{moment(one.StudyPlannerComponentStartTime).add(one.duration,'days').format('MM-DD')}</h6>
-                                        <br/>
-                                        {body}
-                                    </div>
-                                )
-                            })
-                            :null
-                            }
-                            <br/>
-                            <br/>
-
-                            <div className="d-flex justify-content-end">
-                                {StudyPlanner.User_key === Number(token['id'])
-                                ?
-                                    <div style={{paddingRight:"10px"}}>
-                                        <button className="btn btn-outline-danger btn-sm" onClick={()=>DeleteStudyPlannerBtn(StudyPlanner)}>Delete</button>   
-                                    </div>
-                                :null
-                                }
-                                <button className="btn btn-outline-dark btn-sm" onClick={()=>OneStudyPlannerBtn(StudyPlanner)}>See detail</button>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                )})
-            }
-            </div>
-
-*/
 
 export default Study

@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from 'react'
+import React,{useState} from 'react'
 import {useCookies} from 'react-cookie';
 
 function ReadOneArticle(props) {
@@ -54,23 +54,23 @@ function ReadOneArticle(props) {
     return (
 
         <div className="App">
-            <section className="mb-5">
+            <section id="ReadOneArticleBody" className="mb-5">
                 <h2>description : </h2>
-                <div className="card bg-light">
+                <div id="ReadOneArticleDescription" className="card bg-light">
                 <h3 style={{color:"#282c34"}}>{props.ArticleInfo.description}</h3>
                 </div>
 
                 <br/>
                 <h4>gatherMember : </h4>
-                <div className="card bg-light">
+                <div id="ReadOneArticleGatherMember" className="card bg-light">
                 <h4 style={{color:"#282c34"}}>{props.ArticleInfo.gatherMember}</h4>
                 </div>
 
                 <br/>
-                <h4>Applicants : {props.ArticleInfo.ApplyMember}</h4>
+                <h4 id="ReadOneArticleApplicants">Applicants : {props.ArticleInfo.ApplyMember}</h4>
 
                 <br/>
-                <h4>duration : {props.ArticleInfo.duration} days</h4>
+                <h4 id="ReadOneArticleDuration">duration : {props.ArticleInfo.duration} days</h4>
 
                 <br/>
                 <br/>
@@ -78,16 +78,16 @@ function ReadOneArticle(props) {
                     ?
                     props.Applicants.map(Applicant=>{
                         return(
-                            <div key={Applicant.id}>
+                            <div id="ReadOneArticleApplicantInfo" key={Applicant.id}>
                                 <li  style={{fontSize:"25px"}}>user : {Applicant.apply_user}</li>
                             </div>
                         )
                     })
                     :null
                 }
-
             </section>
             
+            <section id="ReadOneArticleBtns">
             {token['id'] === ''+props.ArticleInfo.User_key 
              ?  <div className="d-flex justify-content-end">
                 <button className="btn-lg btn-success" onClick={()=>ModifyOneArticleBtn()}>Modify Article</button>
@@ -99,8 +99,9 @@ function ReadOneArticle(props) {
     
             <br/>
             <br/>
+            </section>
 
-            <section className="mb-5">
+            <section id="ReadOneArticleComments" className="mb-5">
                 <div className="card bg-light">
 
                     {props.Comments && props.Comments.map(Comment=>{
@@ -109,7 +110,7 @@ function ReadOneArticle(props) {
                         if(''+CommentKey===token['id']){
                                       
                             return(
-                                <div className="card-body" key={Comment.id} style={{backgroundColor:"#282c34"}}>
+                                <div id="ReadOneArticleComment" className="card-body" key={Comment.id} style={{backgroundColor:"#282c34"}}>
                                 <p>{Comment.comment_user} : {Comment.comment_date}</p>
                                     <div className="card bg-light">
                                     <p style={{color:"#282c34"}}>{Comment.comment_textfield}</p>
@@ -125,7 +126,7 @@ function ReadOneArticle(props) {
                         }
                         else{
                             return(
-                                <div className="card-body" key={Comment.id} style={{backgroundColor:"#282c34"}}>
+                                <div id="ReadOneArticleComment" className="card-body" key={Comment.id} style={{backgroundColor:"#282c34"}}>
                                 <p>{Comment.comment_user} : {Comment.comment_date}</p>
                                 <div className="card bg-light">
                                     <p style={{color:"#282c34"}}>{Comment.comment_textfield}</p>
@@ -143,7 +144,7 @@ function ReadOneArticle(props) {
                     <div className="card-body" style={{backgroundColor:"#282c34"}}>
                         
                         {modifyMode ?
-                            <form className="mb-4" >
+                            <form id="ModifyComment" className="mb-4" >
                                 <textarea className="form-control" rows="3" 
                                 onChange={e=>setcomment_textfield(e.target.value)} value={comment_textfield}>
                                 </textarea>
@@ -157,7 +158,7 @@ function ReadOneArticle(props) {
                         }
 
                         {modifyMode ?
-                            <div className="d-flex justify-content-end">
+                            <div id="ModifyCommentBtns" className="d-flex justify-content-end">
                                 <button className="btn btn-primary" onClick={()=>RegisterModifyBtn()}>Modify</button>
                             </div> 
                             :<div className="d-flex justify-content-end">

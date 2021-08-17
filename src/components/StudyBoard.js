@@ -5,8 +5,8 @@ import moment from 'moment';
 function StudyBoard(props) {
 
     return (
-        <div>
-            <Table striped bordered hover variant="dark" size="sm">
+        <div className="App">
+            <Table id="StudyBoardList" striped bordered hover variant="dark" size="sm">
                 
                 <thead>
                 <tr className="text-center">

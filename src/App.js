@@ -1,6 +1,5 @@
 import './App.css';
 import React,{useState,useEffect,useReducer} from 'react';
-import axios from 'axios';
 import StudyBoard from './components/StudyBoard';
 import CreateArticle from './components/CreateArticle';
 import ReadOneArticle from './components/ReadOneArticle';
@@ -56,7 +55,7 @@ function App() {
     .then(resp=>setArticles(resp.data))
     .catch(error=>console.log(error))
 
-  },[])
+  },[token])
   
   const logoutBtn = () => {
     removeToken('id')
@@ -183,10 +182,9 @@ function App() {
   const FinishGatheringBtn3 = (Study_id) => {
 
     Applicants.map(Applicant=>{
-      ApplicantAPI.PostStudyMember(Study_id,Applicant.User_key,token['mytoken'])
+      return ApplicantAPI.PostStudyMember(Study_id,Applicant.User_key,token['mytoken'])
       .catch(error => console.log(error))
     })
-
     RefreshBtn()
   }
 
@@ -198,47 +196,49 @@ function App() {
     header = <h2>스터디 게시판</h2>;
     
     if(studyID)
-      body = <div><button className="btn btn-primary btn-sm" onClick={MyStudyBtn}>My Study</button></div>;
+      body = <section id="toMyStudy"><button className="btn btn-primary btn-sm" onClick={MyStudyBtn}>My Study</button></section>;
     else
-      body = <div><button className="btn btn-success" onClick={()=>dispatch({type:'createMode'})}>Create StudyBoard</button></div>;
+      body = <section id="CreateStudyBord"><button className="btn btn-success" onClick={()=>dispatch({type:'createMode'})}>Create StudyBoard</button></section>;
       tail = <StudyBoard articles={articles} oneArticleReadBtn={oneArticleReadBtn}/>;
   }
   else if(state.mode === 'createMode'){
     header = <h2>스터디 게시글 생성</h2>;
-    body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
-    tail = <CreateArticle  RefreshBtn={RefreshBtn}/>;
+    body = <section id="ShowStudyBoard"><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></section>;
+    tail = <CreateArticle RefreshBtn={RefreshBtn}/>;
   }
   else if(state.mode === 'readOneMode'){
     header = <h2>Title : {article.title}</h2>
-    body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
+    body = <section id="ShowStudyBoard"><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></section>;
     tail = <ReadOneArticle ArticleInfo={article} ModifyOneArticleBtn={ModifyOneArticleBtn}
               Comments={Comments} PostCommentBtn={PostCommentBtn} ModifyCommentBtn={ModifyCommentBtn} DeleteCommentBtn={DeleteCommentBtn}
               Applicants={Applicants} ApplicantBtn={ApplicantBtn} FinishGatheringBtn={FinishGatheringBtn}/>
   }      
   else if(state.mode==='updateMode'){
     header = <h2>스터디 게시글 수정</h2>;
-    body = <div><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></div>;
-    tail = <CreateArticle  ModifyBtn={ModifyBtn} ArticleInfo={article} DeleteBtn={DeleteBtn}/>;
+    body = <section id="ShowStudyBoard"><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></section>;
+    tail = <CreateArticle ModifyBtn={ModifyBtn} ArticleInfo={article} DeleteBtn={DeleteBtn}/>;
   }
 
   return (
     <div className="App">
       
-      <div className="row">
-        <div><button className="btn btn-danger btn-sm" onClick={()=>logoutBtn()}>Logout/Refresh</button></div>
-        <div className="d-flex justify-content-center">
+      <article id="StudyBoardHead" className="row">
+        <section id="LogoutRefreshForStudyBoard"><button className="btn btn-danger btn-sm" onClick={()=>logoutBtn()}>Logout/Refresh</button></section>
+        <section id="StudyBoardHeadContent"className="d-flex justify-content-center">
         {header}
-        </div>
-      </div>
+        </section>
+      </article>
 
-      <div className="row">
-        <div className="d-flex justify-content-end">
+      <article id="StudyBoardBody" className="row">
+        <section id="StudyBoardBodyContent" className="d-flex justify-content-end">
         {body}
-        </div>
-      </div>
+        </section>
+      </article>
       
       <br/>
+      <article id="StudyBoardFoot">
       {tail}
+      </article>
     </div>
   );
 }

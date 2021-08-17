@@ -45,7 +45,8 @@ function CreateArticle(props) {
             setGatherMember(props.ArticleInfo.gatherMember)
             setDuration(props.ArticleInfo.duration)
         }
-    },[])
+        else{}
+    },[props.ArticleInfo])
 
     const DeleteBtn = () => {
 
@@ -54,22 +55,22 @@ function CreateArticle(props) {
     
     return (
         
-        <div className="CreateArticle">
-
-            <div className="mb-3">
+        <div className="App">
+        <section id="CreateArticle">
+            <div id="CreateArticleTitle" className="mb-3">
             <label htmlFor="Title" className="form-label">Title</label>
             <input type="text" className="form-control" id="title" placeholder="Please Enter The Title"
                  value={title} onChange={(e)=>setTitle(e.target.value)}/>
             </div>
             
-            <div className="mb-3">
+            <div id="CreateArticleDescription" className="mb-3">
             <label htmlFor="Description" className="form-label">Description</label>
             <textarea className="form-control" id="description" rows="5" placeholder="Please Enter Description"
                 value={description} onChange = {e=>setDescription(e.target.value)}/>
             </div>
           
             <br/>
-            <div className="row">     
+            <div id="CreateArticleGatherMember" className="row">     
                 <div className="col-sm-6">
                 <label htmlFor="gatherMember" className="form-label">Gather Member(including you) :</label>
                 <input type="number" className="form-control" id="Gather" placeholder="Number only..." 
@@ -79,7 +80,7 @@ function CreateArticle(props) {
             </div>
             
             <br/>
-            <div className="row">     
+            <div id="CreateArticleDuration" className="row">     
                 <div className="col-sm-6">
                 <label htmlFor="gatherMember" className="form-label">Duration :</label>
                 <input type="number" className="form-control" id="Duration" placeholder="30 ~ 90 days" 
@@ -91,15 +92,16 @@ function CreateArticle(props) {
             <br/>
             
             {props.ArticleInfo
-                ?<div className="d-flex justify-content-start">
+                ?<div id="ModifyDeleteBtnForCreateArticle" className="d-flex justify-content-start">
                 <button className="btn-lg btn-success" onClick={ModifyBtn}>Modify</button>
                 <button className="btn-lg btn-danger" onClick={DeleteBtn}>Delete</button>
                 </div>
             
-                :<div className="d-flex justify-content-start">
+                :<div id="SubmitBtnForCreateArticle" className="d-flex justify-content-start">
                 <button className="btn-lg btn-success" onClick={CreateBtn}>Submit</button>
                 </div>
-            }   
+            }  
+        </section> 
         </div>
     )
 }
