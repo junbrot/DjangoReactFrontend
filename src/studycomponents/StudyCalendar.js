@@ -15,8 +15,9 @@ function StudyCalendar(props) {
         props.StudyPlanners.map(OneStudyPlanner=>{
             OneStudyPlanner.component.map(One=>{
                 if(Number(One.id) ===Number(planner.publicId)){
+                    props.dispatch({type:'StudyPlanner'})
                     props.OneStudyPlannerBtn(OneStudyPlanner)
-                    window.scrollTo(0, 300)
+                    // window.scrollTo(0, 300)
                 }
             })
         })
@@ -70,14 +71,6 @@ function StudyCalendar(props) {
     return (
 
         <div id="StudyCalendar">
-            <div  id="StudyCalendar head" className="d-flex justify-content-start">
-                <h2 style={{paddingRight:"10px"}}>Calendar</h2>
-                {props.CalendarShowCond
-                    ? <button className="btn btn-info btn-sm" onClick={()=>props.setCalendarShowCond(false)}>Small Calendar</button>
-                    : <button className="btn btn-info btn-sm" onClick={()=>props.setCalendarShowCond(true)}>Full Calendar</button>
-                }  
-            </div>
-            <br/>
             
             {props.CalendarShowCond
                 ?<section id="StudyCalendar body" className="card">

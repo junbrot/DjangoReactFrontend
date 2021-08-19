@@ -1,5 +1,6 @@
 import React,{useState} from 'react'
 import {useCookies} from 'react-cookie';
+import StudyAPI from '../API/StudyAPI';
 
 function ReadOneArticle(props) {
     
@@ -44,7 +45,19 @@ function ReadOneArticle(props) {
     }
 
     const ApplicantBtn = () => {
-        props.ApplicantBtn()
+
+        StudyAPI.getStudyMemberID(token['id'],token['mytoken'])
+        .then(resp=>{
+            try{
+                if(Number(resp.data.length)===0){
+                    props.ApplicantBtn()
+                }
+                else{
+                    alert("you already have study")
+                }
+            }
+            catch{}
+        })
     }
   
     const FinishGatheringBtn = () =>{

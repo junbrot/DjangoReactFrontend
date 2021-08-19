@@ -1,6 +1,7 @@
 import React from 'react'
 import Table from 'react-bootstrap/Table';
 import moment from 'moment';
+import StudyBoardAPI from '../API/StudyBoardAPI';
 
 function StudyBoard(props) {
 
@@ -22,6 +23,13 @@ function StudyBoard(props) {
                 <tbody>
                 
                 {props.articles && props.articles.map(article=>{
+
+                    if( moment().format('YYYY-MM-DD') > moment(article.uploadDate).add(10,'days').format('YYYY-MM-DD')){
+                        StudyBoardAPI.DeleteBtn(article.StudyBoard_key,props.token['mytoken'])
+                        return null;
+                    }
+                    else{}
+
                     return(
                         <tr className="text-center" key={article.StudyBoard_key} 
                             onClick={()=>props.oneArticleReadBtn(article)}>

@@ -1,9 +1,9 @@
-import React,{useEffect,useState,useCallback} from 'react'
+import React,{useEffect,useState,useCallback, useReducer} from 'react'
 import {useCookies} from 'react-cookie';
 import {useHistory} from 'react-router-dom'
-import moment from 'moment';
 import StudyPlannerAPI from '../API/StudyPlannerAPI';
 import StudyAPI from '../API/StudyAPI';
+import StudyHead from './StudyHead';
 import StudyPlannersComp from './StudyPlannersComp';
 import OneStudyPlannerComp from './OneStudyPlannerComp';
 import MyStudyPlannersComp from './MyStudyPlannersComp';
@@ -11,12 +11,28 @@ import StudyCommentAPI from '../API/StudyCommentAPI';
 import StudyCommentComp from './StudyCommentComp';
 import StudyCalendar from './StudyCalendar';
 
+const initialState={mode:'StudyPlanners'}
+  
+const reducer = (state,action) => {
+  switch(action.type){
+    case 'Calendar':
+      return {mode:'Calendar'}
+    case 'Comments':
+      return {mode:'Comments'}
+    default :
+      return {mode:'StudyPlanners'}
+  }
+}
+
+
 function Study() {
-    let history = useHistory()
     
+    let history = useHistory()
+
     const [token,setToken, removeToken] = useCookies(['mytoken','userId','id'])
     const [StudyInfo,SetStudyInfo] = useState('')
-    
+    const[state,dispatch] = useReducer(reducer,initialState)
+
     const [modifyTitleCond,setModifyTitleCond] = useState(false)
     const [title,setTitle] = useState('')
 
@@ -302,134 +318,177 @@ function Study() {
         :<div><button id="modify_title_Btn" className="btn btn-success btn-sm" onClick={()=>modifyStudyID()}>modify title</button></div>)
     }
 
+    var content_head = null;
+    if(state.mode === 'StudyPlanners'){
+        content_head =  
+            <section className="StudyPlannersHead">
+                <section className="StudyPlannersCreateMode">
+                {createStudyPlannerCond
+                    ?<section id="CreateStudyPlanner">
+                        <div className="mb-3">
+                            <h2 className="form-label">Planner title :</h2>
+                            <input type="text" className="form-control" placeholder="write title" onChange={e=>setstudyPlannerTitle(e.target.value)}></input><br/>
+                        </div>
+                        <button className="btn btn-primary btn-sm" onClick={CreateStudyPlannerBtn}>Create</button>
+                        <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(false)}>back</button>
+                    </section>
+                    :
+                    <section id="StudyPlannerBtn" className="d-flex justify-content-start">
+                        <section id="CreateStudyPlannerBtn" style={{paddingRight:"10px"}}>
+                            <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(true)}>Create Planner Component</button>
+                        </section>
+                        <section id="MyStudyPlannerBtn">
+                            {myStudyPlannerCond
+                                ?<button className="btn btn-info btn-sm" onClick={()=>setMyStudyPlannerCond(false)}>Show All Component</button>
+                                :<button className="btn btn-info btn-sm" onClick={()=>setMyStudyPlannerCond(true)}>Show My Component</button>
+                            }
+                        </section>
+                    </section>
+                }
+                </section>
+                <br/>
+                <section id="StudyPlannersHead">
+                    <section id="StudyPlannersTitle">
+                        {myStudyPlannerCond
+                            ?<h2>My StudyPlanners</h2>
+                            :<h2>All StudyPlanners</h2>
+                        }
+                    </section>
+                    <div className="d-flex justify-content-end" >
+                        <button className="btn btn-primary" style={{marginRight:"10px"}}
+                            onClick={()=>dispatch({type:'Calendar'})}>Calendar</button>
+                        <button className="btn btn-success"
+                            onClick={()=>dispatch({type:'Comments'})}>Comments</button>
+                    </div>
+                </section>
+            </section>
+    }
+    else if(state.mode === 'Calendar'){
+        content_head =  
+            <section id="StudyCalenderHead">
+                <section  id="StudyCalendar head" className="d-flex justify-content-start">
+                    <h2 style={{paddingRight:"10px"}}>Calendar</h2>
+                    {CalendarShowCond
+                        ? <button className="btn btn-info btn-sm" onClick={()=>setCalendarShowCond(false)}>Small Calendar</button>
+                        : <button className="btn btn-info btn-sm" onClick={()=>setCalendarShowCond(true)}>Full Calendar</button>
+                    }  
+                </section>
+                <div className="d-flex justify-content-end" >
+                    <button className="btn btn-warning" style={{marginRight:"10px"}}
+                        onClick={()=>dispatch({type:'StudyPlanners'})}>StudyPlanners</button>
+                    <button className="btn btn-success"
+                        onClick={()=>dispatch({type:'Comments'})}>Comments</button>
+                </div>
+            </section>
+    }
+    else if(state.mode === 'Comments'){
+        content_head = 
+            <section id="StudyCommentHead">
+                <section className="d-flex justify-content-start">
+                    <h2 style={{paddingRight:"10px"}}>Comments</h2>
+                    {CommentShowCond
+                        ? <button className="btn btn-info btn-sm" onClick={()=>setCommentShowCond(false)}>Some Comments</button>
+                        : <button className="btn btn-info btn-sm" onClick={()=>setCommentShowCond(true)}>All Comments</button>
+                    }
+                    
+                </section>
+                <div className="d-flex justify-content-end" >
+                    <button className="btn btn-warning" style={{marginRight:"10px"}}
+                        onClick={()=>dispatch({type:'StudyPlanners'})}>StudyPlanners</button>
+                    <button className="btn btn-primary" style={{marginRight:"10px"}}
+                        onClick={()=>dispatch({type:'Calendar'})}>Calendar</button>
+                </div>
+            </section>
+    }
+
+
+    var content_body = null;
+    if(state.mode === 'StudyPlanners'){
+        content_body =
+            <section id="StudyPlannersBody">
+                {OneStudyPlannerCond
+                    ?<section id="OneStudyPlanner">
+                        
+                        <OneStudyPlannerComp  
+                            StudyPlanner={StudyPlanner} 
+                                            
+                            ModifyStudyPlannerBtn={ModifyStudyPlannerBtn} ModifyStudyPlanner={ModifyStudyPlanner} 
+                            ModifyStudyPlannerCond={ModifyStudyPlannerCond} setModifyStudyPlannerCond={setModifyStudyPlannerCond} 
+                            ModifyStudyPlannerTitle={ModifyStudyPlannerTitle} setModifyStudyPlannerTitle={setModifyStudyPlannerTitle} 
+
+                            CreateComponentBtn={CreateComponentBtn} CreateComponent={CreateComponent} CreateComponentCond={CreateComponentCond} 
+                            setCreateComponentCond={setCreateComponentCond} 
+                            setCreateComponentTitle={setCreateComponentTitle} setCreateComponentDuration={setCreateComponentDuration} 
+                            
+                            ModifyComponentBtn={ModifyComponentBtn} ModifyComponent={ModifyComponent} 
+                            ModifyComponentTitle={ModifyComponentTitle} setModifyComponentTitle={setModifyComponentTitle}
+                            ModifyComponentDuration={ModifyComponentDuration} setModifyComponentDuration={setModifyComponentDuration} 
+                            ModifyComponentCond={ModifyComponentCond} setModifyComponentCond={setModifyComponentCond} 
+                            
+                            DeleteComponentBtn={DeleteComponentBtn} 
+
+                            setOneStudyPlannerCond={setOneStudyPlannerCond} SuccessBtn={SuccessBtn} FailBtn={FailBtn}>
+                        </OneStudyPlannerComp>
+                    
+                    </section>
+                    :
+                        <section id="StudyPlannersMode">
+                        {myStudyPlannerCond
+                            ?<section id="MyStudyPlanners">
+                                <MyStudyPlannersComp
+                                    StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
+                                    DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
+                                </MyStudyPlannersComp>
+                            </section>
+                            :<section id="StudyPlanners">
+                                <StudyPlannersComp 
+                                    StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
+                                    DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
+                                </StudyPlannersComp>            
+                            </section>
+                        }
+                        </section>
+                }
+            </section>
+    }
+    else if(state.mode === 'Calendar'){
+        content_body = 
+            <section id="StudyCalendarBody">
+                <StudyCalendar StudyPlanners={StudyPlanners} token={token} OneStudyPlannerBtn={OneStudyPlannerBtn}
+                    CalendarShowCond={CalendarShowCond} setCalendarShowCond={setCalendarShowCond} dispatch={dispatch}/>
+            </section>
+    }
+    else if(state.mode === 'Comments'){
+        content_body = 
+            <section id="StudyComments">
+                <StudyCommentComp 
+                    Comments={Comments} CommentShowCond={CommentShowCond} setCommentShowCond={setCommentShowCond}
+                    
+                    CreateCommentDescription={CreateCommentDescription} setCreateCommentDescription={setCreateCommentDescription}
+                    CreateCommentBtn={CreateCommentBtn} 
+                    
+                    ModifyCommentDescription={ModifyCommentDescription} setModifyCommentDescription={setModifyCommentDescription}
+                    ModifyCommentCond={ModifyCommentCond} ModifyCommentBtn={ModifyCommentBtn} ModifyComment={ModifyComment} 
+                    
+                    DeleteCommentBtn={DeleteCommentBtn}>
+                </StudyCommentComp>
+            </section>
+    }
+
     return (
         <div className="App">
             
             <article id="StudyHead">
-                {modifyTitleCond
-                ?<section id="modifyStudyTitle" className="mb-3">
-                    <h2 className="form-label">Title :</h2>
-                    <input type="text" className="form-control" id="title" placeholder="Please Enter The Title"
-                        value={title} onChange={(e)=>setTitle(e.target.value)}/>
-                </section>
-                :<h2 style={{textAlign:"center"}}>{StudyInfo.title}</h2>
-                }
-                
-                <br/>
-                <section id="Logout_Refresh_Btn" className="d-flex justify-content-start"> 
-                    <div style={{paddingRight:"10px"}}>
-                        <button className="btn btn-danger btn-sm" onClick={()=>logoutBtn()}>Logout/Refresh</button></div>
-                    {ModifyTitleBtn}
-                </section>
-                
-                <br/>
-                <section id="toStudyBoardBtn">
-                    <button className="btn btn-primary btn-sm" onClick={()=>history.push('/StudyBoard')}>StudyBoard</button>
-                    <br/><br/>
-                    <h4 id="Duration">Duration : {moment(StudyInfo.StudyStartTime).format('YYYY-MM-DD')} to   
-                        {' '}{moment(StudyInfo.StudyStartTime).add(StudyInfo.duration,'days').format('YYYY-MM-DD')}</h4>
-                </section>
+                <StudyHead modifyTitleCond={modifyTitleCond} title={title} setTitle={setTitle} StudyInfo={StudyInfo}
+                    logoutBtn={logoutBtn} ModifyTitleBtn={ModifyTitleBtn}/>
             </article>
-
 
             <br/><br/><br/>
             <article id="StudyBody">
-                {createStudyPlannerCond
-                ?<section id="CreateStudyPlanner">
-                    <div className="mb-3">
-                        <h2 className="form-label">Planner title :</h2>
-                        <input type="text" className="form-control" placeholder="write title" onChange={e=>setstudyPlannerTitle(e.target.value)}></input><br/>
-                    </div>
-                    <button className="btn btn-primary btn-sm" onClick={CreateStudyPlannerBtn}>Create</button>
-                    <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(false)}>back</button>
-                </section>
-                :
-                <section id="StudyPlannerBtn" className="d-flex justify-content-start">
-                    <section id="CreateStudyPlannerBtn" style={{paddingRight:"10px"}}>
-                        <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(true)}>Create Planner Component</button>
-                    </section>
-                    <section id="MyStudyPlannerBtn">
-                        {myStudyPlannerCond
-                            ?<button className="btn btn-info btn-sm" onClick={()=>setMyStudyPlannerCond(false)}>Show All Component</button>
-                            :<button className="btn btn-info btn-sm" onClick={()=>setMyStudyPlannerCond(true)}>Show My Component</button>
-                        }
-                    </section>
-                </section>
-                }
             
-                <br/><br/>
-                <section id="StudyPlanner">
-                    <h2>StudyPlanners</h2>
-                </section>
-                
-                {OneStudyPlannerCond
-                ?<section id="OneStudyPlanner">
-                    
-                    <OneStudyPlannerComp  
-                        StudyPlanner={StudyPlanner} 
-                                        
-                        ModifyStudyPlannerBtn={ModifyStudyPlannerBtn} ModifyStudyPlanner={ModifyStudyPlanner} 
-                        ModifyStudyPlannerCond={ModifyStudyPlannerCond} setModifyStudyPlannerCond={setModifyStudyPlannerCond} 
-                        ModifyStudyPlannerTitle={ModifyStudyPlannerTitle} setModifyStudyPlannerTitle={setModifyStudyPlannerTitle} 
+                {content_head}<br/>
+                {content_body}
 
-                        CreateComponentBtn={CreateComponentBtn} CreateComponent={CreateComponent} CreateComponentCond={CreateComponentCond} 
-                        setCreateComponentCond={setCreateComponentCond} 
-                        setCreateComponentTitle={setCreateComponentTitle} setCreateComponentDuration={setCreateComponentDuration} 
-                        
-                        ModifyComponentBtn={ModifyComponentBtn} ModifyComponent={ModifyComponent} 
-                        ModifyComponentTitle={ModifyComponentTitle} setModifyComponentTitle={setModifyComponentTitle}
-                        ModifyComponentDuration={ModifyComponentDuration} setModifyComponentDuration={setModifyComponentDuration} 
-                        ModifyComponentCond={ModifyComponentCond} setModifyComponentCond={setModifyComponentCond} 
-                        
-                        DeleteComponentBtn={DeleteComponentBtn} 
-
-                        setOneStudyPlannerCond={setOneStudyPlannerCond} SuccessBtn={SuccessBtn} FailBtn={FailBtn}>
-                    </OneStudyPlannerComp>
-                
-                </section>
-                :
-                    <section id="StudyPlannersMode">
-                    {myStudyPlannerCond
-                        ?<section id="MyStudyPlanners">
-                            <MyStudyPlannersComp
-                                StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
-                                DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
-                            </MyStudyPlannersComp>
-                        </section>
-                        :<section id="StudyPlanners">
-                            <StudyPlannersComp 
-                                StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
-                                DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
-                            </StudyPlannersComp>            
-                        </section>
-                    }
-                    </section>
-                }
-
-                <br/>
-                <br/>
-
-                <section id="StudyCalendar">
-                    <StudyCalendar StudyPlanners={StudyPlanners} token={token} OneStudyPlannerBtn={OneStudyPlannerBtn}
-                        CalendarShowCond={CalendarShowCond} setCalendarShowCond={setCalendarShowCond}/>
-                </section>
-
-                <br/>
-                <br/>
-                
-                <section id="StudyComments">
-                    <StudyCommentComp 
-                        Comments={Comments} CommentShowCond={CommentShowCond} setCommentShowCond={setCommentShowCond}
-                        
-                        CreateCommentDescription={CreateCommentDescription} setCreateCommentDescription={setCreateCommentDescription}
-                        CreateCommentBtn={CreateCommentBtn} 
-                        
-                        ModifyCommentDescription={ModifyCommentDescription} setModifyCommentDescription={setModifyCommentDescription}
-                        ModifyCommentCond={ModifyCommentCond} ModifyCommentBtn={ModifyCommentBtn} ModifyComment={ModifyComment} 
-                        
-                        DeleteCommentBtn={DeleteCommentBtn}>
-                    </StudyCommentComp>
-                </section>
             </article>
         </div>
     )

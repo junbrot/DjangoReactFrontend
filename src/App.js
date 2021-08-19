@@ -9,6 +9,7 @@ import StudyBoardAPI from './API/StudyBoardAPI';
 import CommentAPI from './API/CommentAPI';
 import ApplicantAPI from './API/ApplicantAPI';
 import StudyAPI from './API/StudyAPI';
+// import moment from 'moment';
 
 const initialState={mode:'readMode'}
   
@@ -157,12 +158,17 @@ function App() {
         alert("full")
       }
     })
-    
+  }
+
+  const FinishGatheringBtnWithID =(StudyInfo)=> {
+    var Study_id = 0
+    ApplicantAPI.PostStudyMaster(StudyInfo,token['mytoken'])
+    .then(resp=>Study_id=resp.data['id'])
+    .catch(error=>console.log(error))
+    .then(()=>FinishGatheringBtn2(Study_id))
   }
 
   const FinishGatheringBtn =()=> {
-    console.log(Applicants)
-    // 나중에 StudyBoard 삭제 기능까지 추가    
     var StudyInfo = {'User_key':Number(token['id']),'title':article.title,'duration':article.duration}
     var Study_id = 0
     ApplicantAPI.PostStudyMaster(StudyInfo,token['mytoken'])
@@ -185,7 +191,10 @@ function App() {
       return ApplicantAPI.PostStudyMember(Study_id,Applicant.User_key,token['mytoken'])
       .catch(error => console.log(error))
     })
-    RefreshBtn()
+
+    StudyBoardAPI.DeleteBtn(article.StudyBoard_key,token['mytoken'])
+    .then(()=>RefreshBtn())
+    .catch(error=>console.log(error))
   }
 
   var header = null;
@@ -199,7 +208,8 @@ function App() {
       body = <section id="toMyStudy"><button className="btn btn-primary btn-sm" onClick={MyStudyBtn}>My Study</button></section>;
     else
       body = <section id="CreateStudyBord"><button className="btn btn-success" onClick={()=>dispatch({type:'createMode'})}>Create StudyBoard</button></section>;
-      tail = <StudyBoard articles={articles} oneArticleReadBtn={oneArticleReadBtn}/>;
+      tail = <StudyBoard articles={articles} oneArticleReadBtn={oneArticleReadBtn} 
+                FinishGatheringBtnWithID={FinishGatheringBtnWithID} token={token}/>;
   }
   else if(state.mode === 'createMode'){
     header = <h2>스터디 게시글 생성</h2>;
@@ -218,6 +228,9 @@ function App() {
     body = <section id="ShowStudyBoard"><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></section>;
     tail = <CreateArticle ModifyBtn={ModifyBtn} ArticleInfo={article} DeleteBtn={DeleteBtn}/>;
   }
+
+  
+  // console.log((moment().format('YYYY-MM-DD')) < (moment().add(1,'days').format('YYYY-MM-DD')))
 
   return (
     <div className="App">
