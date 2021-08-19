@@ -6,6 +6,10 @@ import StudyPlannerAPI from '../API/StudyPlannerAPI';
 import StudyAPI from '../API/StudyAPI';
 import StudyPlannersComp from './StudyPlannersComp';
 import OneStudyPlannerComp from './OneStudyPlannerComp';
+import MyStudyPlannersComp from './MyStudyPlannersComp';
+import StudyCommentAPI from '../API/StudyCommentAPI';
+import StudyCommentComp from './StudyCommentComp';
+import StudyCalendar from './StudyCalendar';
 
 function Study() {
     let history = useHistory()
@@ -14,10 +18,12 @@ function Study() {
     const [StudyInfo,SetStudyInfo] = useState('')
     
     const [modifyTitleCond,setModifyTitleCond] = useState(false)
-    const[title,setTitle] = useState('')
+    const [title,setTitle] = useState('')
 
-    const[createStudyPlannerCond,setcreateStudyPlannerCond] = useState(false)
-    const[studyPlannerTitle,setstudyPlannerTitle] = useState('')
+    const [createStudyPlannerCond,setcreateStudyPlannerCond] = useState(false)
+    const [studyPlannerTitle,setstudyPlannerTitle] = useState('')
+
+    const [myStudyPlannerCond,setMyStudyPlannerCond] = useState(false)
 
     const [StudyPlanners,setStudyPlanners] = useState([])
     const [StudyPlanner,setStudyPlanner] = useState('')
@@ -35,6 +41,32 @@ function Study() {
     const [ModifyComponentTitle,setModifyComponentTitle] = useState('')
     const [ModifyComponentDuration,setModifyComponentDuration] = useState('')
 
+    const [Comments,setComments] = useState('')
+    const [Comment,setComment] = useState('')
+
+    const [CreateCommentDescription,setCreateCommentDescription] = useState('')
+
+    const [ModifyCommentCond,setModifyCommentCond] = useState(false)
+    const [ModifyCommentDescription,setModifyCommentDescription] = useState('')
+
+    const [CommentShowCond,setCommentShowCond] = useState(false)
+
+    const [CalendarShowCond,setCalendarShowCond] = useState(false)
+
+    const GetStudyCommentsFirst = useCallback(async (id)=>{
+        var reverseComment = []
+        StudyCommentAPI.getStudyComment(id,token['mytoken'])
+        .then(resp=>{
+            resp.data.map(comment=>{
+                reverseComment=[comment,...reverseComment]
+                return null;
+            })
+            return null;
+        })
+        .catch(error=>console.log(error))
+        .then(()=>setComments(reverseComment))
+    },[token]);
+
     const GetStudyPlannersComponentFirst = useCallback(async (id,data) => {
         var allData = []
 
@@ -48,10 +80,11 @@ function Study() {
                 oneData['component'] = oneComponent
                 allData=[...allData,oneData]
                 setStudyPlanners(allData)
+                GetStudyCommentsFirst(id)
             })
             return null;
         })
-    },[token]);
+    },[token,GetStudyCommentsFirst]);
 
     const GetStudyPlannersFirst = useCallback(async (id) => {
         var data
@@ -127,10 +160,26 @@ function Study() {
                 oneData['component'] = oneComponent
                 allData=[...allData,oneData]
                 setStudyPlanners(allData)
+                GetStudyComments(id)
             })
             return null;
         })
     }
+
+    const GetStudyComments =(id)=>{
+        var reverseComment=[]
+        StudyCommentAPI.getStudyComment(id,token['mytoken'])
+        .then(resp=>{
+            resp.data.map(comment=>{
+                reverseComment=[comment,...reverseComment]
+                return null;
+            })
+            return null;
+        })
+        .catch(error=>console.log(error))
+        .then(()=>setComments(reverseComment))
+    }
+
 
     const OneStudyPlannerBtn=(OneStudyPlanner)=>{
         setStudyPlanner(OneStudyPlanner)
@@ -209,9 +258,37 @@ function Study() {
     }
 
     const FailBtn = (one) => {
-        
         one['condition'] = 2
         StudyPlannerAPI.putComponent(StudyInfo.id,one.StudyPlanner_key,one.id,one,token['mytoken'])
+        .then(resp=>GetStudyPlanners(StudyInfo.id))
+        .catch(error=>console.log(error))
+    }
+
+    const CreateCommentBtn = () =>{
+        var info={'Study_key':StudyInfo.id,'comment_user':token['userId'],
+            'comment_textfield':CreateCommentDescription,'User_key':token['id']}
+        StudyCommentAPI.postStudyComment(StudyInfo.id,info,token['mytoken'])
+        .then(rep=>GetStudyPlanners(StudyInfo.id))
+        .catch(error=>console.log(error))
+        .then(()=>setCreateCommentDescription(''))
+    }
+
+    const ModifyCommentBtn = (Comment) =>{
+        setComment(Comment)
+        setModifyCommentDescription(Comment.comment_textfield)
+        setModifyCommentCond(true)   
+    }
+
+    const ModifyComment =()=> {
+        Comment['comment_textfield'] = ModifyCommentDescription
+        StudyCommentAPI.putStudyComment(StudyInfo.id,Comment.id,Comment,token['mytoken'])
+        .then(resp=>GetStudyPlanners(StudyInfo.id))
+        .catch(error=>console.log(error))
+        .then(()=>setModifyCommentCond(false))
+    }
+
+    const DeleteCommentBtn = (Comment) =>{
+        StudyCommentAPI.deleteStudyComment(StudyInfo.id,Comment.id,token['mytoken'])
         .then(resp=>GetStudyPlanners(StudyInfo.id))
         .catch(error=>console.log(error))
     }
@@ -263,17 +340,27 @@ function Study() {
                         <h2 className="form-label">Planner title :</h2>
                         <input type="text" className="form-control" placeholder="write title" onChange={e=>setstudyPlannerTitle(e.target.value)}></input><br/>
                     </div>
-
-                    <br/>
                     <button className="btn btn-primary btn-sm" onClick={CreateStudyPlannerBtn}>Create</button>
                     <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(false)}>back</button>
                 </section>
-                :<section id="CreateStudyPlannerBtn">
-                    <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(true)}>Create Planner Component</button>
+                :
+                <section id="StudyPlannerBtn" className="d-flex justify-content-start">
+                    <section id="CreateStudyPlannerBtn" style={{paddingRight:"10px"}}>
+                        <button className="btn btn-light btn-sm" onClick={()=>setcreateStudyPlannerCond(true)}>Create Planner Component</button>
+                    </section>
+                    <section id="MyStudyPlannerBtn">
+                        {myStudyPlannerCond
+                            ?<button className="btn btn-info btn-sm" onClick={()=>setMyStudyPlannerCond(false)}>Show All Component</button>
+                            :<button className="btn btn-info btn-sm" onClick={()=>setMyStudyPlannerCond(true)}>Show My Component</button>
+                        }
+                    </section>
                 </section>
                 }
             
-                <br/><br/><br/>
+                <br/><br/>
+                <section id="StudyPlanner">
+                    <h2>StudyPlanners</h2>
+                </section>
                 
                 {OneStudyPlannerCond
                 ?<section id="OneStudyPlanner">
@@ -300,14 +387,49 @@ function Study() {
                     </OneStudyPlannerComp>
                 
                 </section>
-                :<section id="StudyPlanners">
-                    <StudyPlannersComp 
-                        StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
-                        DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
-                    </StudyPlannersComp>            
-                </section>
+                :
+                    <section id="StudyPlannersMode">
+                    {myStudyPlannerCond
+                        ?<section id="MyStudyPlanners">
+                            <MyStudyPlannersComp
+                                StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
+                                DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
+                            </MyStudyPlannersComp>
+                        </section>
+                        :<section id="StudyPlanners">
+                            <StudyPlannersComp 
+                                StudyPlanners={StudyPlanners} SuccessBtn={SuccessBtn} FailBtn={FailBtn} 
+                                DeleteStudyPlannerBtn={DeleteStudyPlannerBtn} OneStudyPlannerBtn={OneStudyPlannerBtn}>
+                            </StudyPlannersComp>            
+                        </section>
+                    }
+                    </section>
                 }
 
+                <br/>
+                <br/>
+
+                <section id="StudyCalendar">
+                    <StudyCalendar StudyPlanners={StudyPlanners} token={token} OneStudyPlannerBtn={OneStudyPlannerBtn}
+                        CalendarShowCond={CalendarShowCond} setCalendarShowCond={setCalendarShowCond}/>
+                </section>
+
+                <br/>
+                <br/>
+                
+                <section id="StudyComments">
+                    <StudyCommentComp 
+                        Comments={Comments} CommentShowCond={CommentShowCond} setCommentShowCond={setCommentShowCond}
+                        
+                        CreateCommentDescription={CreateCommentDescription} setCreateCommentDescription={setCreateCommentDescription}
+                        CreateCommentBtn={CreateCommentBtn} 
+                        
+                        ModifyCommentDescription={ModifyCommentDescription} setModifyCommentDescription={setModifyCommentDescription}
+                        ModifyCommentCond={ModifyCommentCond} ModifyCommentBtn={ModifyCommentBtn} ModifyComment={ModifyComment} 
+                        
+                        DeleteCommentBtn={DeleteCommentBtn}>
+                    </StudyCommentComp>
+                </section>
             </article>
         </div>
     )

@@ -12,7 +12,7 @@ function StudyPlannersComp(props) {
                 
                 return (
                     <section id="StudyPlanner" className="col-sm-4" key={StudyPlanner.id} style={{paddingTop:"10px",paddingBottom:"10px"}}>
-                    <section id="StudyPlanner" className="card">
+                    <section id="StudyPlanner" className="card" style={{height:"50vh",overflowY:"auto"}}>
                         <section id="StudyPlanner" className="card-body" >    
                             
                             <section id="StudyPlannerHead" className="card-body" >    
@@ -20,7 +20,17 @@ function StudyPlannersComp(props) {
                             <h6 id="StudyPlannerUserID" className="card-subtitle mb-2 text-muted">{StudyPlanner.userId}</h6>
                             </section>
 
-                            <br/>
+                            <section id="DeleteSeeDetailBtnForComponent" className="d-flex justify-content-end">
+                                {StudyPlanner.User_key === Number(token['id'])
+                                ?
+                                    <div style={{paddingRight:"10px"}}>
+                                        <button className="btn btn-outline-danger btn-sm" onClick={()=>props.DeleteStudyPlannerBtn(StudyPlanner)}>Delete</button>   
+                                    </div>
+                                :null
+                                }
+                                <button className="btn btn-outline-dark btn-sm" onClick={()=>props.OneStudyPlannerBtn(StudyPlanner)}>See detail</button>
+                            </section>
+
                             <br/>
 
                             <section id="StudyPlannerBody">
@@ -60,22 +70,6 @@ function StudyPlannersComp(props) {
                                 })
                                 :null
                                 }
-                            </section>
-
-                            <br/>
-                            <br/>
-
-                            <section id="StudyPlannerFoot">        
-                                <section id="DeleteSeeDetailBtnForComponent" className="d-flex justify-content-end">
-                                    {StudyPlanner.User_key === Number(token['id'])
-                                    ?
-                                        <div style={{paddingRight:"10px"}}>
-                                            <button className="btn btn-outline-danger btn-sm" onClick={()=>props.DeleteStudyPlannerBtn(StudyPlanner)}>Delete</button>   
-                                        </div>
-                                    :null
-                                    }
-                                    <button className="btn btn-outline-dark btn-sm" onClick={()=>props.OneStudyPlannerBtn(StudyPlanner)}>See detail</button>
-                                </section>
                             </section>
                         </section>
                     </section>

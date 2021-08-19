@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Route,BrowserRouter} from 'react-router-dom';
 import App from './App';
 import Login from './components/Login';
-import Study from './Study';
+import Study from './studycomponents/Study';
 import {CookiesProvider} from 'react-cookie';
 
 function Router(){
