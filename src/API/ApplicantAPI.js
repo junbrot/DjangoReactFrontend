@@ -14,18 +14,6 @@ export default class ApplicantAPI{
         })
     }
 
-    // static ApplicantUserCommit(id,User_key,Applicant,token){
-    //     return axios.put(`http://localhost:8000/api/Applicants/${id}/${User_key}/`,Applicant,{
-    //         headers:{'Authorization':`Token ${token}`}
-    //     })
-    // }
-    
-    // static ApplicantUserDelete(id,User_key,Applicant,token){
-    //     return axios.put(`http://localhost:8000/api/Applicants/${id}/${User_key}/`,Applicant,{
-    //         headers:{'Authorization':`Token ${token}`}
-    //     })
-    // }
-
     static PostStudyMaster(StudyInfo,token){
         return axios.post(`http://localhost:8000/api/Studys/`,StudyInfo,{
             headers:{'Authorization':`Token ${token}`}

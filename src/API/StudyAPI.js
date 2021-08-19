@@ -9,8 +9,13 @@ export default class StudyAPI{
     }
 
     static modifyStudyID(id,token,StudyInfo){
-        console.log(StudyInfo)
         return axios.put(`http://localhost:8000/api/Studys/${id}/`,StudyInfo,{
+            headers:{'Authorization':`Token ${token}`}
+        })
+    }
+
+    static deleteStudyID(id,token){
+        return axios.delete(`http://localhost:8000/api/Studys/${id}/`,{
             headers:{'Authorization':`Token ${token}`}
         })
     }

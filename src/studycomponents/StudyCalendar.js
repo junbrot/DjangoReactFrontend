@@ -17,7 +17,6 @@ function StudyCalendar(props) {
                 if(Number(One.id) ===Number(planner.publicId)){
                     props.dispatch({type:'StudyPlanner'})
                     props.OneStudyPlannerBtn(OneStudyPlanner)
-                    // window.scrollTo(0, 300)
                 }
             })
         })

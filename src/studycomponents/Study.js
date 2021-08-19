@@ -10,6 +10,7 @@ import MyStudyPlannersComp from './MyStudyPlannersComp';
 import StudyCommentAPI from '../API/StudyCommentAPI';
 import StudyCommentComp from './StudyCommentComp';
 import StudyCalendar from './StudyCalendar';
+import moment from 'moment';
 
 const initialState={mode:'StudyPlanners'}
   
@@ -114,14 +115,27 @@ function Study() {
     useEffect(()=>{
         
         var id
+        var studyInfo
         StudyAPI.getStudyMemberID(token['id'],token['mytoken'])
         .then(resp=>id = resp.data[0].Study_key)
         .catch(error=>console.log(error))
         .then(()=>{
             StudyAPI.getStudyID(id,token['mytoken'])
-            .then(resp=>SetStudyInfo(resp.data))
+            .then(resp=>studyInfo = resp.data)
             .catch(error=>console.log(error))
-            .then(()=>{GetStudyPlannersFirst(id)})
+            .then(()=>{
+                if(moment(studyInfo.StudyStartTime).add(studyInfo.duration,'days').format('YYYY-MM-DD') < moment().format('YYYY-MM-DD'))
+                {
+                    StudyAPI.deleteStudyID(id,token['mytoken'])
+                    .then(()=>alert('Study Finished'))
+                    .catch(error=>console.log(error))
+                    .then(()=>{history.push('/StudyBoard')})
+                }
+                else{
+                    SetStudyInfo(studyInfo)
+                    GetStudyPlannersFirst(id)
+                }
+            })
         })
         
     },[token,GetStudyPlannersFirst])

@@ -9,16 +9,6 @@ function StudyCommentComp(props) {
     return (
         <div>
             <section id="StudyCommentsList">
-                {/* <div className="d-flex justify-content-start">
-                    <h2 style={{paddingRight:"10px"}}>Comments</h2>
-                    {props.CommentShowCond
-                        ? <button className="btn btn-info btn-sm" onClick={()=>props.setCommentShowCond(false)}>Some Comments</button>
-                        : <button className="btn btn-info btn-sm" onClick={()=>props.setCommentShowCond(true)}>All Comments</button>
-                    }
-                    
-                </div> */}
-                {/* <br/> */}
-                
                 {props.CommentShowCond
                     ?<div className="card bg-light">
 

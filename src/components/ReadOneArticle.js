@@ -1,6 +1,7 @@
 import React,{useState} from 'react'
 import {useCookies} from 'react-cookie';
 import StudyAPI from '../API/StudyAPI';
+import moment from 'moment';
 
 function ReadOneArticle(props) {
     
@@ -84,6 +85,9 @@ function ReadOneArticle(props) {
 
                 <br/>
                 <h4 id="ReadOneArticleDuration">duration : {props.ArticleInfo.duration} days</h4>
+
+                <br/>
+                <h4 id="ReadOneArticleFinishModifyDate">FinishGathering Date : {moment(props.ArticleInfo.uploadDate).add(10,'days').format('YYYY-MM-DD')}</h4>
 
                 <br/>
                 <br/>

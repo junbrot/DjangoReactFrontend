@@ -9,7 +9,7 @@ import StudyBoardAPI from './API/StudyBoardAPI';
 import CommentAPI from './API/CommentAPI';
 import ApplicantAPI from './API/ApplicantAPI';
 import StudyAPI from './API/StudyAPI';
-// import moment from 'moment';
+import moment from 'moment';
 
 const initialState={mode:'readMode'}
   
@@ -228,9 +228,6 @@ function App() {
     body = <section id="ShowStudyBoard"><button className="btn btn-primary" onClick={()=>dispatch({type:'readMode'})}>Show StudyBoard</button></section>;
     tail = <CreateArticle ModifyBtn={ModifyBtn} ArticleInfo={article} DeleteBtn={DeleteBtn}/>;
   }
-
-  
-  // console.log((moment().format('YYYY-MM-DD')) < (moment().add(1,'days').format('YYYY-MM-DD')))
 
   return (
     <div className="App">
