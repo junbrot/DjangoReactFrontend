@@ -159,37 +159,78 @@ frontend :
 
 <br/>
 
-+ 스터디 게시판 초기 화면
++ 스터디 상단 부분
+
+<br/>
+
+frontend :
+> 스터디 제목 표시
+>
+> logout 버튼 구현 
+>
+> 스터디 게시판으로 이동할 수 있는 StudyBoard 버튼 구현
+>
+> 스터디 생성자의 경우 스터디의 제목을 수정할 수 있는 modify title 버튼 표시
+>
+
+<br/>
+
+<br/>
+
++ 스터디 플레너 
 
 <br/>
 
 backend :  
-> api 통신은 django-cors-headers를 사용해 local과 통신 확인
->     
-> sqlite에 StudyBoard 모델 생성, django rest_framework의 serializer를 통한 직렬화
 >
-> rest_framework.decorators의 APIView를 통한 view 구현
+> 1. StudyPlanner 모델
+> 
+> 스터디 id와 user id를 foreign key로 가지고, title 필드를 가짐
+>
+> 2. StudyPlannerComponent 모델
+> 
+> 스터디 id, user id, StudyPlanner id를 foreign key로 가지고
+>
+> 제목, 시작시간, 기간, 성공여부를 표현하는 필드를 가짐
 >
 
 <br/>
 
 frontend :
-> 스터디 게시판 목록은 
+>
+> StudyPlanner를 생성할 수 있는 Create Study Planner 버튼 구현
 > 
-> 1. 스터디를 생성한 유저 id
-> 2. 스터디 title
-> 3. 모집 인원 
-> 4. 지원자 수 
-> 5. upload한 날짜 
-> 6. 스터디 기간 
+> 1. All StudyPlanners
 > 
-> 으로 구성
+>> 각각의 StudyPlanner는 title과 생성한 사람의 id를 표시.
+>>
+>> 자신이 생성한 StudyPlannerComponent는 title, 유저 이름, 시간이 표시 되고, 
+>>
+>> Success와 Fail 버튼이 표시됨. 
+>>
+>> 둘중 하나를 클릭할 시 버튼이 사라지고, Success or Fail 글자만 영구적으로 표시됨
+>>
+>> StudyPlanner 생성자인 경우 Planner를 삭제하는 delete버튼 표시
 >
-> logout버튼 구현
->
-> 스터디 생성 버튼 구현 
->
-> 스터디 게시물 중 한개를 클릭할 시, 스터디 상세 보기 페이지로 이동 
-
+> 2. See detail
+> 
+>> 하나의 StudyPlanner에 대한 상세 정보를 볼 수 있는 See detail 버튼 구현
+>>
+>> See detail 클릭시 하나의 클릭한 StudyPlanner의 정보만 화면에 표시
+>>
+>> 성공 실패 여부를 표시할 수 있는 Success, Fail 버튼과 
+>> 
+>> 자신이 생성한 StudyPlannerComponent를 수정, 삭제할 수 있는 버튼 구현
+>>
+>> StudyPlannerComponent를 생성할 수 있는 Add Plan버튼 구현
+>>
+>> All StudyPlanners 모드로 돌아갈 수 있는 See Planners 버튼 구현
+>> 
+>> StudyPlanner 생성자인 경우 Planner의 제목을 수정할 수 있는 Modify Title 버튼 표시
+>>
+>>
+>>
+>>
+>>
 
 
