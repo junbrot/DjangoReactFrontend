@@ -228,9 +228,17 @@ frontend :
 >> 
 >> StudyPlanner 생성자인 경우 Planner의 제목을 수정할 수 있는 Modify Title 버튼 표시
 >>
+>
+> 3. Show My Component
+>
+>> StudyPlanners 중에 자신이 생성한 Planner 
 >>
 >>
 >>
 >>
-
-
+>>
+>>
+>>
+>>
+>>
+>>
